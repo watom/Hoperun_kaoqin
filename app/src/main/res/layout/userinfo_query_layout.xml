@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/common_bg"
+    android:orientation="vertical">
+
+    <com.watom999.www.hoperun.ETitleBar
+        android:id="@+id/titlebar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/eleApply_secNav_text_style"
+                android:text="基本信息"
+                android:textStyle="bold"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/common_spilt" />
+
+            <LinearLayout
+                style="@style/eleApply_item_style"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/eleApply_blackText_style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="姓名" />
+
+                <TextView
+                    android:id="@+id/name_detaile"
+                    style="@style/eleApply_edittext_style"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="--"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/common_spilt" />
+
+            <LinearLayout
+                style="@style/eleApply_item_style"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/eleApply_blackText_style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="性别" />
+
+                <TextView
+                    android:id="@+id/sex_detaile"
+                    style="@style/eleApply_edittext_style"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="--"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/common_spilt" />
+
+            <LinearLayout
+                style="@style/eleApply_item_style"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/eleApply_blackText_style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="工号" />
+
+                <TextView
+                    android:id="@+id/identity_detaile"
+                    style="@style/eleApply_edittext_style"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="--"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/common_spilt" />
+
+            <LinearLayout
+                style="@style/eleApply_item_style"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/eleApply_blackText_style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="密码" />
+
+                <TextView
+                    android:id="@+id/birthday_detaile"
+                    style="@style/eleApply_edittext_style"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="--"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/common_spilt" />
+
+            <LinearLayout
+                style="@style/eleApply_item_style"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/eleApply_blackText_style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="邮箱" />
+
+                <TextView
+                    android:id="@+id/degree_detaile"
+                    style="@style/eleApply_edittext_style"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="--"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/common_spilt" />
+
+            <LinearLayout
+                style="@style/eleApply_item_style"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/eleApply_blackText_style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="联系电话" />
+
+                <TextView
+                    android:id="@+id/telephone_detaile"
+                    style="@style/eleApply_edittext_style"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="--"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/common_spilt" />
+
+
+            <Button
+                android:id="@+id/btn_call_detaile"
+                style="@style/common_button_red"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="@dimen/margin_to_phone"
+                android:layout_marginTop="50dp"
+                android:background="@color/common_color_a4"
+                android:text="编辑"
+                android:textColor="@color/newcolor_baise" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

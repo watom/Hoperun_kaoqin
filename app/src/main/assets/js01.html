@@ -1,0 +1,185 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>登录系统</title>
+    <style type="text/css">
+.red {
+    letter-spacing : 2px;
+    font-family: "微软雅黑";
+    color: #E30072;
+    font-size:18px;
+}
+.STYLE2 {
+	font-family: "微软雅黑";
+	font-size: 20px;
+	color: #222222;
+	vertical-align: middle;
+}
+.STYLE3 {
+	font-family: "微软雅黑";
+	font-size: 12px;
+	color: #222222;
+}
+.login {
+	width:400px;
+	height:50px;
+	font-family: "微软雅黑";
+	font-size:24px;
+	background-color:#01659C;
+	color:#FFFFFF;
+	border:0px;
+	cursor: pointer;
+}
+.input {
+	font-family: "微软雅黑";
+	font-size: 20px;
+	color: #222222;
+	vertical-align: middle;
+	height:40px;
+	width:330px;
+	line-height: 34px;
+}
+
+
+    </style>
+</head>
+
+<script type="text/javascript">
+
+	function init(){
+	    document.getElementById('login_id').focus();
+        var errors = '';
+        if(errors.length > 0){
+        	var warning = document.getElementById("ecm");
+  		    warning.innerHTML = errors;
+  		    document.getElementById('password').focus();
+        }
+    }
+
+	function doCheck(arg01,arg02){
+   		var flag = false;
+   		var warning = document.getElementById("ecm");
+   		var userid="";
+   		var userpwd="";
+   		if(arg01 && arg02){
+		 document.getElementById("login_id").value=arg01;
+		 document.getElementById("password").value=arg02;
+		}else{
+   		 userid = document.getElementById("login_id").value;
+   	     userpwd = document.getElementById("password").value;
+   		}
+		warning.innerHTML = "";
+   		var regu = /^[0-9]+$/;
+	    var re = new RegExp(regu);
+	    if ("" == userid) {
+	        warning.innerHTML = "工号不能为空，请您输入！";
+	        document.getElementById('login_id').focus();
+	    } else if (!re.test(userid)) {
+	        warning.innerHTML = "工号必须为0-9的数字，请您重新输入！";
+	        document.getElementById("login_id").value='';
+	        document.getElementById('login_id').focus();
+   		} else if (9 < userid.length) {
+   		    warning.innerHTML = "工号不能多于9位数字，请您输入！";
+   		    document.getElementById("login_id").value='';
+   		    document.getElementById('login_id').focus();
+   		} else if ("" == userpwd) {
+   		    warning.innerHTML = "密码不能为空，请您输入！";
+   		    document.getElementById('password').focus();
+   		} else if (6 > userpwd.length) {
+   		    warning.innerHTML = "密码至少要6位，请您输入！";
+   		    document.getElementById('password').focus();
+   		}  else {
+   		    flag = true;
+   		}
+   		return flag;
+   	}
+
+    //禁止输入字母和特殊字符
+ 	function blockChar(oText){
+	   testKey();
+		sChar = oText.getAttribute("validchar");
+		ddd = String.fromCharCode(window.event.keyCode);
+		var res = sChar.indexOf(ddd) > -1;
+		return res || window.event.ctrlKey;
+	}
+	//enter提交
+	function testKey(){
+		var ev=window.event.keyCode;
+		if(ev == 13){
+		    doCheck();
+	   }
+	}
+    //安卓调用JS的接口
+	function androidLoginInterface(id,password){
+	      doCheck(id,password);
+	   	}
+
+
+</script>
+<body onload="init()"
+      style="width:100%;height:100%;background:url('http://elec.hoperun.com:8106/eoffice_pc/services/images/login.png') no-repeat;background-position:center; margin:0 0 0 0;">
+<form action="http://elec.hoperun.com:8106/eoffice_pc/login/login" method="post"
+      onsubmit="return doCheck()" id="form" style="margin:0 0 0 0">
+    <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td align="center">
+                <table width="500" height="550" border="0" align="center" cellpadding="0"
+                       cellspacing="0">
+                    <tr>
+                        <td height="250" align="center"><img
+                                src="http://elec.hoperun.com:8106/eoffice_pc/services/images/logo.png">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td height="50" valign="middle" align="center">
+                            <span class="STYLE2">工号：</span>
+                            <input class="input" id="login_id" name="login_id" type="text" value=""
+                                   validchar="0123456789" onkeypress="return blockChar(this)"
+                                   onpaste="return false"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td height="30" valign="middle">
+                            &nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td height="50" valign="middle" align="center">
+                            <span class="STYLE2">密码：</span> <input class="input" id="password"
+                                                                   name="password" type="password"
+                                                                   value=""/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td height="30" valign="middle">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td height="50" valign="middle" align="center">
+                            <input class="login" name="submit" type="submit" value="登    录"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td height="80" valign="middle" class="red">
+                            <div align="center" id="ecm"></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td height="70" valign="bottom" align="center" height="20">
+                            <div style="margin:40px"><span class="STYLE3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;说明：忘记密码的员工，通过电话申请重置密码（025-52668897）。</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</form>
+
+<script type="text/javascript">
+ webView.addJavascriptInterface(new AndroidAndJSInterface(),"Android");
+      (function (id, password){
+			androidLoginInterface(id,password);
+		})(id,password);
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorBackground">#fbf1aa</color>
+    <color name="bar">#6CB0DF</color>
+    <color name="bar1">#B5C2CA</color>
+    <color name="bar2">#F5E6BF</color>
+    <color name="bar3">#81D8C8</color>
+    <color name="linefill">#DEEFE4</color>
+    <color name="description">#686868</color>
+    <color name="province_line_border">#C7C7C7</color>
+    <color name="list_item_green">#1BBC9A</color> <!-- 浅绿色 -->
+    <color name="list_item_gray">#EDEDED</color> <!-- 浅灰色 -->
+    <color name="list_item_shenhui">#7C7784</color> <!-- 深灰色 -->
+    <color name="list_item_shenlvse">#4d9888</color> <!-- 深绿色 -->
+    <color name="text_compareHighestLoad">#ff798f</color> <!-- 橘红色 -->
+    <color name="text_highestLoad">#fe6c36</color> <!-- 橘红色 -->
+    <color name="white">#FFFFFF</color> <!-- 白 -->
+    <color name="common_green">#1bbc9b</color> <!-- 通绿用 -->
+    <color name="common_blue">#0000ff</color> <!-- 邮箱 -->
+    <color name="tomato">#FF6347</color> <!-- 番茄红 -->
+    <color name="powderblue">#B0E0E6</color> <!-- 火药青 -->
+    <color name="ivory">#FFFFF0</color> <!-- 象牙白 -->
+    <color name="listdriver">#A8A8A8</color> <!-- 灰 -->
+    <color name="qianhui">#a6a6a6</color> <!-- 浅灰 -->
+    <color name="zhonglv">#049888</color> <!-- 中绿 -->
+    <color name="listdriver_msg_order">#E5E8EC</color>
+    <color name="floralwhite">#FFFAF0</color> <!-- 花白 -->
+    <color name="transparent">@android:color/transparent</color> <!-- 透明 -->
+    <!-- 暗灰色 -->
+    <color name="dimgrey">#E22F2F</color>
+    <!-- 文字颜色 -->
+    <color name="scan_corner_color">#0effc2</color>
+    <drawable name="myactivity_dialog">#32000000</drawable>
+    <drawable name="myactivity_dialog2222">#32000000</drawable>
+
+    <color name="dialog_color">#00000000</color>
+    <color name="text_gray">#666666</color>
+    <color name="text_green">#3fe082</color>
+    <color name="text_black">#333333</color>
+    <color name="text_black_dan">#626262</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_blue">#00A0E9</color>
+    <color name="text_blue1">#0054a1</color>
+    <color name="text_yellow">#E9C21D</color>
+    <color name="text_home_own">#F7AB00</color> <!-- 首页表内余额颜色 -->
+    <color name="text_green1">#74A63B</color>
+    <color name="light_blue">#CDF0FA</color>
+    <color name="common_bg">#f3f4f6</color>
+    <color name="imageButton_background">#00ffffff</color>
+    <color name="transferm">#00000000</color>
+    <color name="mypop_color">#003839</color>
+    <color name="prompt_text_gray1">#888888</color>
+    <color name="prompt_text_gray2">#787878</color>
+    <color name="prompt_text_gray3">#cceae7</color>
+    <color name="prompt_text_green">#6AC863</color>
+    <color name="prompt_text_black">#4B4A4A</color>
+    <color name="prompt_text_style">#0FA690</color>
+    <!-- 输入框提示文字颜色 -->
+    <color name="text_hint">#a6a6a6</color>
+    <!-- 背景颜色 -->
+    <color name="color_green">#5fff00</color>
+    <color name="color_blue">#20B2AA</color>
+    <color name="color_red">#f44f0f</color>
+    <color name="background_f0f4f5">#f0f4f5</color>
+    <color name="back_grid">#F0EFF5</color>
+    <color name="background_electry">#DFF9F1</color>
+    <color name="text_RGB676767">#676767</color>
+    <color name="devier">#e0ded7</color>
+    <color name="item_selected">#B0DFEF</color>
+    <color name="head_color">#1bbc9b</color>
+    <color name="newcolor_qianlv2">#81DBD4</color>
+
+    <!-- 透明背景 -->
+    <drawable name="translucent_color">#50000000</drawable>
+    <drawable name="translucents_color">#E9E9E9</drawable>
+    <!-- 网点 -->
+    <color name="pop_title_color">#F56B24</color>
+
+    <!-- 电量电费阶梯 -->
+    <color name="jtpower">#333333</color>
+    <color name="firstladderpower">#4edf73</color>
+    <color name="secondladderpower">#fdc101</color>
+    <color name="thridladderpower">#fe6c36</color>
+    <color name="electricityprogressbar">#cccccc</color>
+    <color name="umspay_transparent">#00FF00FF</color>
+
+    <drawable name="umspay_myactivity_dialog">#32000000</drawable>
+    <drawable name="umspay_myactivity_dialog2222">#32000000</drawable>
+
+    <!-- 进度查询 -->
+    <color name="top_tag_green">#4EE073</color>
+    <color name="top_tag_red">#FA6E23</color>
+    <color name="top_tag_gray">#BBB9BA</color>
+    <!-- 用电分析 -->
+    <color name="bar_color">#2dcd70</color>
+    <color name="line_blue">#498bdc</color>
+    <color name="line_green">#2fcb72</color>
+    <color name="Black_black">#FF000000</color>
+    <color name="h_pro_line">#e3e9ec</color>
+    <color name="spilt">#e5e5e5</color>
+    <color name="gray1">#787878</color>
+    <color name="gray2">#7F7F7F</color>
+    <color name="gray">#606060</color>
+    <color name="blue">#74B2FA</color> <!-- 蓝用 -->
+    <color name="lbs_gray">#EDEEF0</color>
+
+
+    <!-- 新app公共颜色 -->
+    <color name="newcolor_shenlv">#049888</color>
+    <color name="newcolor_qianlv">#77c7be</color>
+    <color name="newcolor_qinglv">#cdeae7</color>
+    <color name="newcolor_baise">#fff</color>
+    <color name="newcolor_qianhui">#f7f7f7</color>
+    <color name="newcolor_shenhui">#eaebec</color>
+    <color name="newcolor_yinhui">#A6A6A6</color>
+    <color name="newcolor_heise">#000000</color>
+    <color name="newcolor_huise">#787878</color>
+    <color name="newcolor_huise2">#7F7F7F</color>
+    <color name="newcolor_qianhei">#c8c7cc</color>
+    <color name="newcolor_newb2">#b2b2b2</color>
+    <color name="newcolor_newbf5">#f5f5f5</color>
+    <color name="newcolor_yellow">#f17f00</color>
+    <color name="newcolor_yellowyw">#f5a623</color>
+    <color name="newcolor_red">#d62137</color>
+    <color name="newcolor_shenred">#fc6156</color>
+    <color name="newcolor_qianred">#feefee</color>
+    <color name="newcolor_time">#D1CDD0</color>
+    <color name="newcolor_zhengjian">#f2fbf9</color>
+    <color name="newcolor_qianyellow">#fce8c8</color>
+    <color name="newcolor_black">#333333</color>
+    <color name="newcolor_danlv">#e6f5f3</color>
+
+
+    <color name="e_common_titlebar_bg">#049888</color>
+    <color name="e_common_black_dark">#000000</color>
+    <color name="e_color_line_divider">#c8c7cc</color>
+    <color name="e_color_app_bg">#F7F7F7</color>
+    <color name="e_color_transparent">#00000000</color>
+    <color name="e_color_blue">#049888</color>
+    <color name="e_color_blue_lighter">#049888</color>
+    <color name="e_color_black">#3F3F3F</color>
+    <color name="e_color_black_lighter">#999999</color>
+    <color name="e_color_white">#FFFFFF</color>
+    <color name="e_color_red">#FA3335</color>
+    <color name="e_light_red">#E84A40</color>
+    <color name="e_color_green">#64A815</color>
+    <color name="e_color_yellow">#FFF090</color>
+    <color name="e_color_orange">#F6992B</color>
+    <color name="e_color_gray_fill">#C5C5C5</color>
+
+    <color name="e_textcolor_hint">#C5C5C5</color>
+    <color name="e_textcolor_black_dark">#3F3F3F</color>
+    <color name="e_textcolor_black_normal">#777777</color>
+    <color name="e_textcolor_gray_lighter">#E9EBEC</color>
+    <color name="e_textcolor_gray_normal">#999999</color>
+    <color name="e_textcolor_label_tip">#999999</color>
+
+    <color name="calendar_active_month_bg">#fff5f7f9</color>
+    <color name="calendar_bg">#ffffffff</color>
+    <color name="calendar_divider">#ffbababa</color>
+    <color name="calendar_inactive_month_bg">#ffd7d9db</color>
+    <color name="calendar_selected_day_bg">#ff379bff</color>
+    <color name="calendar_highlighted_day_bg">#ccffcc</color>
+    <color name="calendar_selected_range_bg">#ff96caff</color>
+    <color name="calendar_text_inactive">#40778088</color>
+    <color name="calendar_text_active">#ff778088</color>
+    <color name="calendar_text_selected">#ffffffff</color>
+    <color name="calendar_text_unselectable">#7f778088</color>
+    <color name="calendar_text_highlighted">#ff778088</color>
+
+    <color name="custom_header_text">#85B100</color>
+    <color name="custom_selected">#A8D324</color>
+    <color name="custom_background">#F0F8DB</color>
+    <color name="custom_background_today">#FF9105</color>
+    <color name="custom_background_disabled">#F0F8DB</color>
+    <color name="custom_text_selected">#FFFFFFFF</color>
+    <color name="custom_text_inactive">#7f778088</color>
+
+    <color name="light_gray">#99a4b7</color>
+    <color name="deep_gray">#394257</color>
+    <color name="border_gray">#d9dfe5</color>
+    <color name="bg_gray">#e1e1e1</color>
+    <color name="btn_gray">#d1d1d1</color>
+    <color name="glass_gall">#c2ebef</color>
+    <!--<color name="light_blue">#87d0f2</color>-->
+
+    <!-- common wanghaitao -->
+    <color name="common_color_a1">#333333</color>
+    <color name="common_color_a2">#888585</color>
+    <color name="common_color_a3">#b6b5b5</color>
+    <color name="common_color_a4">#aeaeae</color>
+    <color name="common_color_a5">#f54e0e</color>
+    <color name="common_spilt">#e0e0e0</color>
+    <color name="common_spilt2">#f0f0f0</color>
+    <color name="common_spilt3">#ebebeb</color>
+    <color name="common_titlebar_bg">#049888</color>
+</resources>

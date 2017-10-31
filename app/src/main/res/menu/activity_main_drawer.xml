@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_ehr"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="润和EHR系统" />
+        <item
+            android:id="@+id/nav_gallery"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="公司邮箱" />
+        <item
+            android:id="@+id/nav_bigevent"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="简讯" />
+        <item
+            android:id="@+id/nav_slideshow"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="我的记事本" />
+        <item
+            android:id="@+id/nav_manage"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="设置" />
+    </group>
+
+    <item android:title="属性">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="分享" />
+            <item
+                android:id="@+id/nav_relate"
+                android:icon="@drawable/ic_menu_relate"
+                android:title="关于我们" />
+        </menu>
+    </item>
+
+</menu>

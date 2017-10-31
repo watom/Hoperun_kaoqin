@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <declare-styleable name="ArrowTextView">
+        <attr name="radius" format="dimension" />
+        <attr name="arrowWidth" format="dimension" />
+        <attr name="arrowHeight" format="dimension" />
+        <attr name="bg" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="CompoundButton">
+        <attr name="android:button" />
+    </declare-styleable>
+    <declare-styleable name="NumberCircleProgressBar">
+        <attr name="progress" format="integer" />
+        <attr name="max" format="integer" />
+        <attr name="progress_unreached_color" format="color" />
+        <attr name="progress_reached_color" format="color" />
+        <attr name="progress_text_size" format="dimension" />
+        <attr name="progress_text_color" format="color" />
+        <attr name="progress_circle_radius" format="dimension" />
+        <attr name="progress_text_visibility" format="enum">
+            <enum name="visible" value="0" />
+            <enum name="invisible" value="1" />
+        </attr>
+        <attr name="progress_fill_mode" format="enum">
+            <enum name="rotate" value="0" />
+            <enum name="rising_water" value="1" />
+        </attr>
+    </declare-styleable>
+    <declare-styleable name="Themes">
+        <attr name="numberProgressBarStyle" format="reference" />
+    </declare-styleable>
+
+    <!-- E Title Bar view -->
+    <declare-styleable name="E_TitleBar_View">
+
+        <!-- 标题文字 -->
+        <attr name="titlebar_text" format="string" />
+    </declare-styleable>
+
+    <!-- E table view -->
+    <declare-styleable name="E_Table_View">
+
+        <!-- 左侧文字 -->
+        <attr name="leftText" format="string" />
+        <!-- 右侧文字 -->
+        <attr name="rightText" format="string" />
+        <!-- 左侧文字大小 -->
+        <attr name="leftTextSize" format="dimension" />
+        <!-- 右侧文字大小 -->
+        <attr name="rightTextSize" format="reference" />
+        <!-- 是否底部线条左侧缩进 -->
+        <attr name="showIndent" format="boolean" />
+        <!-- 右侧文字hint -->
+        <attr name="rightTextHint" format="string" />
+        <!-- 中间文字 -->
+        <attr name="contentText" format="string" />
+        <!-- 是否显示右箭头 -->
+        <attr name="showArrow" format="boolean" />
+        <!-- 左侧文字颜色 -->
+        <attr name="leftTextColor" format="reference|color" />
+        <!-- 中间文字颜色 -->
+        <attr name="contentTextColor" format="reference|color" />
+        <!-- 右侧文字颜色 -->
+        <attr name="rightTextColor" format="reference|color" />
+        <!-- 右侧文字暗提示颜色 -->
+        <attr name="rightTextHintColor" format="reference|color" />
+        <!-- 左侧显示的图片 -->
+        <attr name="leftImage" format="reference" />
+        <!-- 是否可以改变背景色 -->
+        <attr name="changeBackground" format="boolean" />
+        <!-- 左侧文字数目，不够的已空格补充 -->
+        <attr name="leftCharNum" format="integer" />
+        <!-- 控件显示位置 -->
+        <attr name="type">
+            <flag name="top" value="0" />
+            <flag name="center" value="1" />
+            <flag name="bottom" value="2" />
+            <flag name="single" value="3" />
+        </attr>
+    </declare-styleable>
+
+    <!-- E lable view -->
+    <declare-styleable name="E_Label_View">
+
+        <!-- 左侧文字 -->
+        <attr name="labelLeftText" format="string" />
+        <!-- 中间文字 -->
+        <attr name="labelContentText" format="string" />
+        <!-- 右侧文字 -->
+        <attr name="labelRightText" format="string" />
+        <!-- 左侧文字颜色 -->
+        <attr name="labelLeftColor" format="reference|color" />
+        <!-- 中间文字颜色 -->
+        <attr name="labelContentColor" format="reference|color" />
+        <!-- 右侧文字颜色 -->
+        <attr name="labelRightColor" format="reference|color" />
+    </declare-styleable>
+
+    <!-- E input view -->
+    <declare-styleable name="E_Input_View">
+
+        <!-- 左侧图片 -->
+        <attr name="inputLeftImage" format="reference" />
+        <!-- 左侧文字 -->
+        <attr name="inputLeftText" format="string" />
+        <!-- 中间文字 -->
+        <attr name="inputContentText" format="string" />
+        <!-- 中间文字 -->
+        <attr name="inputContentHint" format="string" />
+        <!-- 右侧文字 -->
+        <attr name="inputBtnText" format="string" />
+        <!-- 左侧文字颜色 -->
+        <attr name="inputLeftTextColor" format="reference|color" />
+        <!-- 中间文字颜色 -->
+        <attr name="inputContentTextColor" format="reference|color" />
+        <!-- 中间文字颜色 -->
+        <attr name="inputHintColor" format="reference|color" />
+        <!-- 左侧文字数目，不够的已空格补充 -->
+        <attr name="inputLeftCharNum" format="integer" />
+        <!-- 文本框文字最大字符数 -->
+        <attr name="inputMaxInputLength" format="integer" />
+        <!-- 是否显示删除按钮 -->
+        <attr name="inputShowDelete" format="boolean" />
+        <!-- 控件显示位置 -->
+        <attr name="inputViewType">
+            <flag name="top" value="0" />
+            <flag name="center" value="1" />
+            <flag name="bottom" value="2" />
+            <flag name="single" value="3" />
+        </attr>
+        <!-- 输入的文本类型 -->
+        <attr name="inputType">
+            <flag name="number" value="0" />
+            <flag name="password" value="1" />
+            <!-- 无限制 -->
+            <flag name="none" value="2" />
+            <!-- 不允许输入 -->
+            <flag name="disable" value="3" />
+        </attr>
+        <!-- 输入框文本对齐方式 -->
+        <attr name="inputTextAlign">
+            <flag name="left" value="0" />
+            <flag name="center" value="1" />
+            <flag name="right" value="2" />
+        </attr>
+    </declare-styleable>
+
+    <!-- E multi table view -->
+    <declare-styleable name="E_Multi_Table_View">
+
+        <!-- 左侧文字一 -->
+        <attr name="MTLeftText1" format="string" />
+        <!-- 左侧文字二 -->
+        <attr name="MTLeftText2" format="string" />
+        <!-- 左侧文字三 -->
+        <attr name="MTLeftText3" format="string" />
+        <!-- 右侧文字一 -->
+        <attr name="MTRightText1" format="string" />
+        <!-- 右侧文字二 -->
+        <attr name="MTRightText2" format="string" />
+        <!-- 右侧文字一颜色 -->
+        <attr name="MTRightTextColor1" format="reference|color" />
+        <!-- 右侧文字二颜色 -->
+        <attr name="MTRightTextColor2" format="reference|color" />
+        <!-- 左侧文字二前部图片 -->
+        <attr name="MTLeftImage2" format="reference" />
+        <!-- 左侧文字三前部图片 -->
+        <attr name="MTLeftImage3" format="reference" />
+        <!-- 右侧第一行显示图片 -->
+        <attr name="MTRightImage1" format="reference" />
+        <!-- 右侧第二行显示图片 -->
+        <attr name="MTRightImage2" format="reference" />
+        <!-- 是否显示右箭头 -->
+        <attr name="MTShowArrow" format="boolean" />
+        <!-- 是否可以改变背景色 -->
+        <attr name="MTChangeBackground" format="boolean" />
+        <!-- 控件显示位置 -->
+        <attr name="MTType">
+            <flag name="top" value="0" />
+            <flag name="center" value="1" />
+            <flag name="bottom" value="2" />
+            <flag name="single" value="3" />
+        </attr>
+    </declare-styleable>
+    <declare-styleable name="CalendarPickerView">
+        <attr name="android:background" />
+        <attr name="tsquare_dividerColor" format="color" />
+        <attr name="tsquare_dayBackground" format="reference" />
+        <attr name="tsquare_dayTextColor" format="color" />
+        <attr name="tsquare_titleTextColor" format="color" />
+        <attr name="tsquare_displayHeader" format="boolean" />
+        <attr name="tsquare_headerTextColor" format="color" />
+    </declare-styleable>
+    <declare-styleable name="calendar_cell">
+        <attr name="tsquare_state_selectable" format="boolean" />
+        <attr name="tsquare_state_current_month" format="boolean" />
+        <attr name="tsquare_state_today" format="boolean" />
+        <attr name="tsquare_state_range_first" format="boolean" />
+        <attr name="tsquare_state_range_middle" format="boolean" />
+        <attr name="tsquare_state_range_last" format="boolean" />
+        <attr name="tsquare_state_highlighted" format="boolean" />
+    </declare-styleable>
+
+    <!--自定义dialog风格：一般弹出-->
+    <style name="dialog_custom" parent="@android:style/Theme.Dialog">
+        <item name="android:windowIsFloating">true</item>    <!--是否浮在界面上-->
+        <item name="android:windowIsTranslucent">true</item> <!--是否半透明-->
+        <item name="android:windowNoTitle">false</item>       <!--是否有标题-->
+        <item name="android:windowBackground">@android:color/transparent</item> <!--窗口背景色透明-->
+        <item name="android:backgroundDimEnabled">false</item> <!--背景是否模糊显示-->
+    </style>
+    <!--自定义dialog风格：底部弹出 加入了动画效果-->
+    <style name="bottom_menu_animation" parent="android:Animation">
+        <item name="@android:windowEnterAnimation">@anim/bottom_menu_enter</item>
+        <item name="@android:windowExitAnimation">@anim/bottom_menu_exit</item>
+    </style>
+
+</resources>

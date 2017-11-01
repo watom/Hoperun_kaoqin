@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  *@Copyright: 2017(C), 国电通__期
  *@Author&Email: wanghaitao 1164973719@qq.com
  *@FileName: com.watom999.www.hoperun.data
- *@Function: 1、
+ *@Function: 1、用数据库保存数据
  *@Description: 1、       
  *@CreatedDate: 2017/10/31 15:56
  *@UpDate: 1、

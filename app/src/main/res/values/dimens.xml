@@ -10,4 +10,5 @@
     <dimen name="margin_to_right">10dp</dimen>
     <dimen name="margin_to_phone">10dp</dimen>
     <dimen name="e_text_size_big">18sp</dimen>
+    <dimen name="common_spilt1_width">160sp</dimen>
 </resources>

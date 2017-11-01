@@ -23,13 +23,10 @@
 
             <TextView
                 style="@style/eleApply_secNav_text_style"
-                android:text="基本信息"
+                android:text="用户信息"
                 android:textStyle="bold"/>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/common_spilt" />
+            <View style="@style/mStyle_spilt1"/>
 
             <LinearLayout
                 style="@style/eleApply_item_style"
@@ -50,10 +47,7 @@
                     android:text="--"/>
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/common_spilt" />
+            <View style="@style/mStyle_spilt1"/>
 
             <LinearLayout
                 style="@style/eleApply_item_style"
@@ -74,10 +68,7 @@
                     android:text="--"/>
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/common_spilt" />
+            <View style="@style/mStyle_spilt1"/>
 
             <LinearLayout
                 style="@style/eleApply_item_style"
@@ -98,10 +89,7 @@
                     android:text="--"/>
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/common_spilt" />
+            <View style="@style/mStyle_spilt1"/>
 
             <LinearLayout
                 style="@style/eleApply_item_style"
@@ -122,10 +110,7 @@
                     android:text="--"/>
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/common_spilt" />
+            <View style="@style/mStyle_spilt1"/>
 
             <LinearLayout
                 style="@style/eleApply_item_style"
@@ -146,10 +131,7 @@
                     android:text="--"/>
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/common_spilt" />
+            <View style="@style/mStyle_spilt1"/>
 
             <LinearLayout
                 style="@style/eleApply_item_style"
@@ -170,10 +152,7 @@
                     android:text="--"/>
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/common_spilt" />
+            <View style="@style/mStyle_spilt1"/>
 
 
             <Button
@@ -184,7 +163,7 @@
                 android:layout_gravity="bottom"
                 android:layout_marginBottom="@dimen/margin_to_phone"
                 android:layout_marginTop="50dp"
-                android:background="@color/common_color_a4"
+                android:background="@color/blue"
                 android:text="编辑"
                 android:textColor="@color/newcolor_baise" />
         </LinearLayout>

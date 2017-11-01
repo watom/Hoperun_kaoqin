@@ -2,14 +2,15 @@
     android:id="@+id/rl_titlebar"
     android:layout_width="match_parent"
     android:layout_height="44dp"
-    android:background="@color/e_common_titlebar_bg"
-    android:gravity="center_vertical" >
+    android:background="@color/colorPrimary"
+    android:gravity="center_vertical">
 
     <RelativeLayout
         android:id="@+id/rl_title"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center" >
+        android:gravity="center"
+       >
 
         <ImageView
             android:id="@+id/iv_title_right"

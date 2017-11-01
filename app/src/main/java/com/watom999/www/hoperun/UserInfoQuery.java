@@ -18,6 +18,7 @@ public class UserInfoQuery extends AppCompatActivity{
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();  //去掉标题栏
         setContentView(R.layout.userinfo_query_layout);
     }
 }

@@ -79,7 +79,8 @@ public class ETitleBar extends RelativeLayout {
 
 		setTitle(mTitleText);
 		mPaint = new Paint();
-		mPaint.setColor(Color.parseColor("#049888"));
+//		画一条线
+		mPaint.setColor(Color.parseColor("#3F51B5"));
 		mPaint.setAntiAlias(true);
 		mLineHeight = this.getResources().getDimensionPixelSize(
 				R.dimen.e_divider_line_height);

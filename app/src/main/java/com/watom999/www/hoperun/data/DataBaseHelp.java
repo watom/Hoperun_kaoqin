@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.watom999.www.hoperun.utils.Logout;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,7 +24,7 @@ import java.util.Set;
  *@UpDate: 1、
  ***********************************************/
 
-public abstract class DataBaseHelp{
+public class DataBaseHelp extends DBOpenHelper{
     private DBOpenHelper mDBOpenHelper;
     private SQLiteDatabase writableDatabase;
     private Context context;
@@ -30,28 +32,45 @@ public abstract class DataBaseHelp{
     private String mDBname;
     private String[] creatTableSQL;
     private String[] updateTableSQL;
-/**
- *http://www.cnblogs.com/yangqiangyu/p/5530440.html
- *http://blog.csdn.net/liuhe688/article/details/6715983
- *http://blog.csdn.net/qq_27280457/article/details/51790055
- *http://yzxqml.iteye.com/blog/1717135
- */
 
-    protected abstract int getDBVersion(Context context);
 
-    protected abstract String getDBName(Context context);
 
-    protected abstract String[] getCreatTableSQL(Context context);
+    public void execSQL(String sql){
+        this.writableDatabase.execSQL(sql);
+    }
 
-    protected abstract String[] getUpdateTableSQL(Context context);
+    public void execSQL(String sql,Object[] params){
+        this.writableDatabase.execSQL(sql,params);
+    }
+
+    @Override
+    protected int getDBVersion(Context context) {
+        return 0;
+    }
+
+    @Override
+    protected String getDBName(Context context) {
+        return null;
+    }
+
+    @Override
+    protected String[] getCreatTableSQL(Context context) {
+        return new String[0];
+    }
+
+    @Override
+    protected String[] getUpdateTableSQL(Context context) {
+        return new String[0];
+    }
 
     public DataBaseHelp(Context context) {
+        super(context);
         this.context = context;
         this.mDBVersion = getDBVersion(context);
         this.mDBname = getDBName(context);
         this.creatTableSQL=getCreatTableSQL(context);
         this.updateTableSQL=getUpdateTableSQL(context);
-        this.mDBOpenHelper = new DBOpenHelper(context);
+        writableDatabase = mDBOpenHelper.getWritableDatabase();
     }
 
     protected void openDB(){
@@ -62,6 +81,7 @@ public abstract class DataBaseHelp{
             }
         }).start();
     }
+
     public void closeDB(){
         this.writableDatabase.close();
         this.mDBOpenHelper.close();
@@ -70,10 +90,7 @@ public abstract class DataBaseHelp{
 
 
     /**
-     * 统一对ContentValues处理
-     * @param contentValues
-     * @param key
-     * @param value
+     * 用ContentValues存放数据，不用关注放入类型
      */
     private void ContentValuesPut(ContentValues contentValues, String key, Object value){
         if (value==null){
@@ -100,10 +117,10 @@ public abstract class DataBaseHelp{
 
     /**
      * 根据数组的列和值进行insert
-     * @param tableName
-     * @param columns
-     * @param values
-     * @return
+     * @param tableName 需要插入数据的数据表名称
+     * @param columns 列标题：要插入表格中的数组，如【姓名|性别|年龄。。。】
+     * @param values  列数据：要插入表格中的数组，如【张三|男|23.。。】
+     * @return 返回插入结果
      */
     public boolean insert(String tableName,String[] columns,Object[] values){
         ContentValues contentValues = new ContentValues();
@@ -111,14 +128,12 @@ public abstract class DataBaseHelp{
             ContentValuesPut(contentValues,columns[rows],values[rows]);
         }
         long rowId = this.writableDatabase.insert(tableName,null,contentValues);
+        Logout.d("数据库插入结果："+rowId+"   -1失败");
         return rowId!=-1;
     }
 
     /**
      * 根据map来进行insert
-     * @param tableName
-     * @param columnValues
-     * @return
      */
     public boolean insert(String tableName,Map<String,Object> columnValues){
         ContentValues contentValues = new ContentValues();
@@ -127,8 +142,8 @@ public abstract class DataBaseHelp{
             String key = (String) iterator.next();
             this.ContentValuesPut(contentValues,key,columnValues.get(key));
         }
-
         long rowId = this.writableDatabase.insert(tableName,null,contentValues);
+        Logout.d("数据库插入结果："+rowId+"   -1失败");
         return rowId!=-1;
     }
 
@@ -174,7 +189,6 @@ public abstract class DataBaseHelp{
         result.put("whereSqlParam",temp);
         return result;
     }
-
 
     /**
      * 根据数组条件来update
@@ -245,14 +259,16 @@ public abstract class DataBaseHelp{
 
 
     /**
-     * 查询返回List
-     * @param sql
-     * @param params
-     * @return
+     * 封装了rawQuery()方法
+     * rawQuery()方法的第一个参数为select语句；第二个参数为select语句中占位符参数的值，如果select语句没有使用占位符，该参数可以设置为null。
+     * Cursor cursor = db.rawQuery("select * from  where name like ? and age=?", new String[]{"xxx", "4"});
+     * @param rawQuerySQL rawQuery()的第一个参数为select语句
+     * @param params  rawQuery()的select语句中占位符参数的值
+     * @return  查询返回List<Map>集合
      */
-    public List<Map> queryListMap(String sql, String[] params){
+    public List<Map> queryListMap(String rawQuerySQL, String[] params){
         ArrayList list = new ArrayList();
-        Cursor cursor = this.writableDatabase.rawQuery(sql,params);
+        Cursor cursor = this.writableDatabase.rawQuery(rawQuerySQL,params);
         int columnCount = cursor.getColumnCount();
         while (cursor.moveToNext()){
             HashMap item = new HashMap();
@@ -311,11 +327,5 @@ public abstract class DataBaseHelp{
         return map;
     }
 
-    public void execSQL(String sql){
-        this.writableDatabase.execSQL(sql);
-    }
 
-    public void execSQL(String sql,Object[] params){
-        this.writableDatabase.execSQL(sql,params);
-    }
 }

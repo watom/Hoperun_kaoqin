@@ -14,18 +14,28 @@ import android.database.sqlite.SQLiteOpenHelper;
  *@UpDate: 1、
  ***********************************************/
 
-public class DBOpenHelper extends SQLiteOpenHelper {
+public abstract class DBOpenHelper extends SQLiteOpenHelper {
 
     private static String name = "mydb.db"; //表示数据库的名称
     private static int version = 1; //更新数据库的版本号，此时会执行 onUpgrade()方法
+
+    protected abstract int getDBVersion(Context context);
+
+    protected abstract String getDBName(Context context);
+
+    protected abstract String[] getCreatTableSQL(Context context);
+
+    protected abstract String[] getUpdateTableSQL(Context context);
+
     public DBOpenHelper(Context context) {
         super(context, name, null, version);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String sql = "create table person(id integer primary key autoincrement,name varchar(64),address varchar(64))";
+        String sql = "create table person(id integer primary key,name varchar(64),account varchar(64))";
         db.execSQL(sql);
+//        db.execSQL("CREATE TABLE IF NOT EXISTS person" +"(_id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR, age INTEGER, website STRING,weibo STRING)");
     }
 
     @Override

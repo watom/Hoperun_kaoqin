@@ -1,7 +1,5 @@
 package com.watom999.www.hoperun;
 
-import android.content.ContentValues;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,7 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.watom999.www.hoperun.data.DBOpenHelper;
+import com.watom999.www.hoperun.data.DataBaseHelp;
+
+import java.util.Map;
 
 /***********************************************
  *@Copyright: 2017(C), 国电通__期
@@ -33,40 +33,39 @@ public class UserInfoQuery extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DBOpenHelper wode = new DBOpenHelper(UserInfoQuery.this);
-                writableDatabase = wode.getWritableDatabase();
-                insert(writableDatabase);
-                query(writableDatabase);
+                insert();
+                query();
             }
         });
     }
 
-    private void insert(SQLiteDatabase db) {
-        //实例化常量值
-        ContentValues cValue = new ContentValues();
-        //添加用户名
-        cValue.put("sname", "xiaoming");
-        //添加密码
-        cValue.put("snumber", "01005");
-        //调用insert()方法插入数据
-        db.insert("stu_table", null, cValue);
+    private void insert() {
+        DataBaseHelp dataBaseHelp = new DataBaseHelp(UserInfoQuery.this);
+        dataBaseHelp.insert("person", new String[]{"name", "accout"}, new String[]{"zhangsan", "jaj"});
     }
 
-    private void query(SQLiteDatabase db) {
-        //查询获得游标
-        Cursor cursor = db.query("stu_table", null, null, null, null, null, null);
-        //判断游标是否为空
-        if (cursor.moveToFirst()) {
-            //遍历游标
-            for (int i = 0; i < cursor.getCount(); i++) {
-
-                cursor.move(i);
-                int id = cursor.getInt(0);
-                String username = cursor.getString(1);
-                String password = cursor.getString(2);
-                //输出用户信息
-                System.out.println(id + ":" + username + ":" + password);
-            }
-        }
+    private void query() {
+        DataBaseHelp dataBaseHelp = new DataBaseHelp(UserInfoQuery.this);
+        Map map = dataBaseHelp.queryItemMap("select * from person", new String[]{"name", "accout"});
+//        //查询获得游标
+////        Cursor cursor = db.query("person", null, null, null, null, null, null);//第一种方式
+//
+//        Cursor cursor = db.rawQuery("select * from person", null);//第二种方式
+//
+//        DataBaseHelp dataBaseHelp = new DataBaseHelp(UserInfoQuery.this);
+//        //判断游标是否为空
+//        Toast.makeText(this,"nihao ",Toast.LENGTH_LONG).show();
+//        if (cursor.moveToFirst()) {
+//            //遍历游标
+//            for (int i = 0; i < cursor.getCount(); i++) {
+//                cursor.move(i);
+//                int id = cursor.getInt(0);
+//                String username = cursor.getString(1);
+//                String password = cursor.getString(2);
+//                Toast.makeText(this,"id="+id+", username="+username+", password="+password,Toast.LENGTH_LONG).show();
+//            }
+//        }
+//        cursor.close();
+//        db.close();
     }
 }

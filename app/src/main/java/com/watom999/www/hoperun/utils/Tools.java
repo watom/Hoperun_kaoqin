@@ -460,8 +460,6 @@ public class Tools {
 
 			@Override
 			public boolean onPreDraw() {
-
-				Logout.e("wh", "h " + view.getHeight() + " w " + view.getWidth());
 				hw[0] = view.getWidth();
 				hw[1] = view.getHeight();
 				return false;
@@ -864,7 +862,6 @@ public class Tools {
 			dataState[2] = transNoArray2[1].replace("\"", "").trim();
 		} catch (Exception e) {
 			e.printStackTrace();
-			Logout.e("YCW", "支付宝签名中解析商户ID失败");
 		}
 
 		return dataState;

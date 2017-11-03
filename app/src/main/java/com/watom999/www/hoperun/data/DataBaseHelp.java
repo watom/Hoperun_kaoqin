@@ -33,7 +33,37 @@ public class DataBaseHelp extends DBOpenHelper{
     private String[] creatTableSQL;
     private String[] updateTableSQL;
 
+    public DBOpenHelper getmDBOpenHelper() {
+        return mDBOpenHelper;
+    }
 
+    public void setmDBOpenHelper(DBOpenHelper mDBOpenHelper) {
+        this.mDBOpenHelper = mDBOpenHelper;
+    }
+
+    public int getmDBVersion() {
+        return mDBVersion;
+    }
+
+    public void setmDBVersion(int mDBVersion) {
+        this.mDBVersion = mDBVersion;
+    }
+
+    public String getmDBname() {
+        return mDBname;
+    }
+
+    public void setmDBname(String mDBname) {
+        this.mDBname = mDBname;
+    }
+
+    public String[] getCreatTableSQL() {
+        return creatTableSQL;
+    }
+
+    public void setCreatTableSQL(String[] creatTableSQL) {
+        this.creatTableSQL = creatTableSQL;
+    }
 
     public void execSQL(String sql){
         this.writableDatabase.execSQL(sql);
@@ -43,34 +73,17 @@ public class DataBaseHelp extends DBOpenHelper{
         this.writableDatabase.execSQL(sql,params);
     }
 
-    @Override
-    protected int getDBVersion(Context context) {
-        return 0;
-    }
 
-    @Override
-    protected String getDBName(Context context) {
-        return null;
-    }
-
-    @Override
-    protected String[] getCreatTableSQL(Context context) {
-        return new String[0];
-    }
-
-    @Override
-    protected String[] getUpdateTableSQL(Context context) {
-        return new String[0];
-    }
-
-    public DataBaseHelp(Context context) {
+    public DataBaseHelp(Context context, DBOpenHelper mDBOpenHelper, SQLiteDatabase writableDatabase, Context context1, int mDBVersion, String mDBname, String[] creatTableSQL, String[] updateTableSQL) {
         super(context);
         this.context = context;
-        this.mDBVersion = getDBVersion(context);
-        this.mDBname = getDBName(context);
-        this.creatTableSQL=getCreatTableSQL(context);
-        this.updateTableSQL=getUpdateTableSQL(context);
-        writableDatabase = mDBOpenHelper.getWritableDatabase();
+        this.mDBVersion = mDBVersion;
+        this.mDBname = mDBname;
+        this.creatTableSQL = creatTableSQL;
+        this.updateTableSQL = updateTableSQL;
+        this.writableDatabase = writableDatabase;
+        this.mDBOpenHelper = mDBOpenHelper;
+
     }
 
     protected void openDB(){

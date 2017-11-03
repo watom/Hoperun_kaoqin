@@ -14,18 +14,10 @@ import android.database.sqlite.SQLiteOpenHelper;
  *@UpDate: 1、
  ***********************************************/
 
-public abstract class DBOpenHelper extends SQLiteOpenHelper {
+public  class DBOpenHelper extends SQLiteOpenHelper {
 
     private static String name = "mydb.db"; //表示数据库的名称
     private static int version = 1; //更新数据库的版本号，此时会执行 onUpgrade()方法
-
-    protected abstract int getDBVersion(Context context);
-
-    protected abstract String getDBName(Context context);
-
-    protected abstract String[] getCreatTableSQL(Context context);
-
-    protected abstract String[] getUpdateTableSQL(Context context);
 
     public DBOpenHelper(Context context) {
         super(context, name, null, version);

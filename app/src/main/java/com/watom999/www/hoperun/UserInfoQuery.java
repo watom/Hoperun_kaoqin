@@ -33,21 +33,21 @@ public class UserInfoQuery extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert();
-                query();
+//                insert();
+//                query();
             }
         });
     }
 
     private void insert() {
-        DataBaseHelp dataBaseHelp = new DataBaseHelp(UserInfoQuery.this);
-        dataBaseHelp.insert("person", new String[]{"name", "accout"}, new String[]{"zhangsan", "jaj"});
+//        DataBaseHelp dataBaseHelp = new DataBaseHelp(UserInfoQuery.this);
+//        dataBaseHelp.insert("person", new String[]{"name", "accout"}, new String[]{"zhangsan", "jaj"});
     }
 
     private void query() {
-        DataBaseHelp dataBaseHelp = new DataBaseHelp(UserInfoQuery.this);
-        Map map = dataBaseHelp.queryItemMap("select * from person", new String[]{"name", "accout"});
-//        //查询获得游标
+//        DataBaseHelp dataBaseHelp = new DataBaseHelp(UserInfoQuery.this);
+//        Map map = dataBaseHelp.queryItemMap("select * from person", new String[]{"name", "accout"});
+////        //查询获得游标
 ////        Cursor cursor = db.query("person", null, null, null, null, null, null);//第一种方式
 //
 //        Cursor cursor = db.rawQuery("select * from person", null);//第二种方式

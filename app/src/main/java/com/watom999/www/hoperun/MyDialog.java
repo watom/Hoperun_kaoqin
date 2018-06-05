@@ -94,7 +94,6 @@ public class MyDialog extends Dialog implements View.OnClickListener, AdapterVie
                 inputId = (EditText) findViewById(R.id.input_id);
                 inputPassword = (EditText) findViewById(R.id.input_password);
                 yes = (Button) findViewById(R.id.yes);
-                no = (Button) findViewById(R.id.no);
                 break;
             case 1:
                 title = (TextView) findViewById(R.id.title);

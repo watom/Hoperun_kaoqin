@@ -12,13 +12,15 @@
             android:icon="@drawable/ic_menu_gallery"
             android:title="公司邮箱" />
         <item
+            android:id="@+id/nav_slideshow"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="云之家" />
+
+        <item
             android:id="@+id/nav_bigevent"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="简讯" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="我的记事本" />
+
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     >
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:background="@drawable/corner_bg"
         android:padding="10dp"
-        android:textColorHint="#77FFEE"
+        android:background="@drawable/corner_bg"
         android:orientation="vertical">
 
         <TextView
@@ -18,15 +18,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginTop="5dp"
             android:gravity="center"
-            android:text="提示"
+            android:text="提  示"
             android:textColor="#5599FF"
             android:textSize="18sp" />
 
         <TextView
-            android:layout_margin="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:text="      首次登陆或者重新登陆后，该APP会自动记住密码！"
             android:textColor="#00AAAA"
             android:textSize="17sp" />
@@ -75,48 +77,16 @@
                 />
 
         </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="#E4E4E4" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:orientation="horizontal">
+    </LinearLayout>
 
             <Button
                 android:id="@+id/yes"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="10dp"
-                android:layout_weight="1"
-                android:background="@null"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/selector_ispress_state"
                 android:gravity="center"
-                android:singleLine="true"
-                android:text="登陆"
-                android:textColor="#7D7D7D"
+                android:text="登 陆"
+                android:textColor="#fff"
+                android:textStyle="bold"
                 android:textSize="16sp" />
-
-            <View
-                android:layout_width="2dp"
-                android:layout_height="match_parent"
-                android:background="#E4E4E4" />
-
-            <Button
-                android:id="@+id/no"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginRight="10dp"
-                android:layout_weight="1"
-                android:background="@null"
-                android:gravity="center"
-                android:singleLine="true"
-                android:text="取消"
-                android:textColor="#38ADFF"
-                android:textSize="16sp" />
-        </LinearLayout>
-    </LinearLayout>
-
-</RelativeLayout>
+</LinearLayout>

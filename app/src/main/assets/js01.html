@@ -45,6 +45,10 @@
 </head>
 
 <script type="text/javascript">
+      webView.addJavascriptInterface(new AndroidAndJSInterface(),"Android");
+      (function (id, password){
+			androidLoginInterface(id,password);
+		})(id,password);
 
 	function init(){
 	    document.getElementById('login_id').focus();
@@ -175,11 +179,5 @@
     </table>
 </form>
 
-<script type="text/javascript">
- webView.addJavascriptInterface(new AndroidAndJSInterface(),"Android");
-      (function (id, password){
-			androidLoginInterface(id,password);
-		})(id,password);
-</script>
 </body>
 </html>

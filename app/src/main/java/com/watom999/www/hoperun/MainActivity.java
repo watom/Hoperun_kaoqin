@@ -1,5 +1,7 @@
 package com.watom999.www.hoperun;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -8,9 +10,12 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,9 +23,14 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.watom999.www.hoperun.data.MySQLiteHelper;
+
+import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
@@ -29,6 +39,7 @@ public class MainActivity extends AppCompatActivity
     MyDialog myDialog;
     WebSettings webSettings;
     Map<String, String> inputData;
+    int page_type=0;//0:主页面 1：ERP系统 2：邮箱 3：云之家
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +55,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
 //                dialogFirstLogin();
                 isFirstCome();//判断是否是第一次登陆，如果是第一次登陆，弹出Dialog，如果不是弹出登陆账号列表
-                Snackbar.make(view, "请选择需要登陆的账号", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "登陆信息已填入，请点击表单上的登录按钮", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
@@ -60,7 +71,6 @@ public class MainActivity extends AppCompatActivity
 
         //------------------------------------
 //        initWebView("http://elec.hoperun.com:8106/eoffice_pc/");
-//        initWebView("file:///android_asset/js.html");//注意路径不同
         initWebView("file:///android_asset/js01.html");//注意路径不同
         //------------------------------------
 
@@ -77,7 +87,7 @@ public class MainActivity extends AppCompatActivity
      */
     private void initWebView(String url) {
         // 加载网页 H5,html,自定义浏览器，或者网页播放器
-//        webView01 = new WebView(this);
+        // webView01 = new WebView(this);
         // 设置WebSettings支持javascript
         webSettings = webView01.getSettings();
         //在本地浏览器的页面里面有页面时，也会调用webview，不会调用手机浏览器
@@ -116,20 +126,48 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * 登陆入口
+     * 登录入口
      */
     private void isFirstCome() {
         if (null != PrefUtils.getString("id", null, this)) {
-            //配置文件中有数据，说明是不是第一次登陆，可以选择账号,正常登陆
-            dialogSelectLogin();
+            //非第一次/非重新登陆，判断是登录的是哪个页面，根据页面提取账号密码，直接登录。
+            switch (page_type){
+                case 0:
+                    //是主页面登录
+                    dialogSelectLogin();
+                    break;
+                case 1:
+                    //是EHR系统的登录
+                    break;
+                case 2:
+                    //是邮箱页面登录
+                    break;
+                case 3:
+                    //是云之家页面登录
+                    break;
+            }
         } else {
-            //配置文件中没有数据，说明第一次登陆，需要输入登陆账号
-            dialogFirstLogin();
+            //第一次登陆，需要输入登陆账号，记住账号。
+            switch (page_type) {
+                case 0:
+                    //是主页面登录
+                    dialogFirstLogin("考勤");
+                    break;
+                case 1:
+                    //是EHR系统的登录
+                    dialogFirstLogin("人事系统");
+                    break;
+                case 2:
+                    //是邮箱页面登录
+                    dialogFirstLogin("公司邮箱");
+                    break;
+                case 3:
+                    //是云之家页面登录
+                    dialogFirstLogin("云之家");
+                    break;
+            }
         }
     }
-
-
-
 
     @Override
     protected void onDestroy() {
@@ -192,10 +230,13 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_ehr) {
             initWebView("http://ehr.hoperun.com:8018/HRIS/");
+            page_type=1;
         } else if (id == R.id.nav_gallery) {
-
+            initWebView("http://mail.hoperun.com/");
+            page_type=2;
         } else if (id == R.id.nav_slideshow) {
-
+            initWebView("https://www.yunzhijia.com/home/?m=open&a=login");
+            page_type=3;
         } else if (id == R.id.nav_manage) {
 
         } else if (id == R.id.nav_bigevent) {
@@ -219,40 +260,73 @@ public class MainActivity extends AppCompatActivity
     /**
      * 首次登陆和添加新的联系人时弹出该对话框
      */
-    private void dialogFirstLogin() {
-        myDialog = new MyDialog(this, 0,new MyDialog.MyDialogCommonListener() {
-            @Override
-            public void onCommonClick(View view) {
-                int id = view.getId();
-                switch (id) {
-                    case R.id.yes:
-                        //保存密码
-                        saveAndGetPassWord();
-                        MainActivity.this.myDialog.dismiss();
-                        break;
-                    case R.id.no:
-                        MainActivity.this.myDialog.dismiss();
-                        break;
-                }
-            }
-        });
-        myDialog.show();
+    private void dialogFirstLogin(String whichPage) {
+        AlertDialog.Builder customizeDialog =
+                new AlertDialog.Builder(MainActivity.this);
+        final View dialogView = LayoutInflater.from(MainActivity.this)
+                .inflate(R.layout.alert_dialog_2editview, null);
+        customizeDialog.setTitle("提 示");
+        customizeDialog.setIcon(R.mipmap.ic_launcher);
+        customizeDialog.setMessage("      首次或重新登陆后，此应用会记住"+whichPage+"的登录信息！");
+        customizeDialog.setView(dialogView);
+        //获取EditView中的输入内容
+        final EditText accountEditText = dialogView.findViewById(R.id.input_id);
+        final EditText passwordEditText = dialogView.findViewById(R.id.input_password);
+        customizeDialog.setPositiveButton("登陆",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (true) {
+                            //保存密码并登陆
+                            String account = accountEditText.getText().toString().trim();
+                            String password = passwordEditText.getText().toString().trim();
+                            login(account, password);
+                            saveUserLoginInfo(account, password,MainActivity.this);
+                        } else {
+                            //提示密码或账号错误
+                            Toast.makeText(MainActivity.this, "密码或账号有误，请重试", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+        customizeDialog.show();
     }
 
     /**
-     * 有联系人存在时，从对话框列表中选择联系人登陆
+     * 联系人登录信息存在时，从对话框列表中选择联系人登陆
      */
-    private void dialogSelectLogin() {
-        myDialog = new MyDialog(this,1, new MyDialog.MyDialogListViewItemListener() {
-            @Override
-            public void onListViewItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //获取存储的用户名称、账号、密码
+    private int yourChoice = -1;
 
-                //登陆
-                login("","");
-            }
-        });
-        myDialog.show();
+    private void dialogSelectLogin() {
+        //直接登录
+        PrefUtils.getString("账号","密码",this);
+        login("账号","密码");
+//        yourChoice = 0;
+//        final String[] items = {"列表1", "列表2", "列表3", "列表4"};
+//        AlertDialog.Builder singleChoiceDialog =
+//                new AlertDialog.Builder(MainActivity.this);
+//        singleChoiceDialog.setIcon(R.mipmap.ic_launcher);
+//        singleChoiceDialog.setTitle("单选+确认Dialog");
+//        // 第二个参数是默认选项，此处设置为0
+//        singleChoiceDialog.setSingleChoiceItems(items, 0,
+//                new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        yourChoice = which;
+//                    }
+//                });
+//        singleChoiceDialog.setPositiveButton("确定",
+//                new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        if (yourChoice != -1) {
+//                            Toast.makeText(MainActivity.this,
+//                                    "确认: " + items[yourChoice], Toast.LENGTH_LONG);
+////                            登陆
+////                            login();
+//                        }
+//                    }
+//                });
+//        singleChoiceDialog.show();
     }
 
     private void login(String id, String password) {
@@ -284,5 +358,35 @@ public class MainActivity extends AppCompatActivity
             dailogBack();
         }
         return false;
+    }
+
+    /**
+     * 获取dialog中的数据
+     *
+     * @param context
+     * @return
+     */
+    public Map<String, String> getUserLoginInfo(Context context, String id, String password) {
+        HashMap<String, String> map = new HashMap<>();
+        if (null != PrefUtils.getString("id", null, context)) {
+            //从SP文件中拿出数据。并装在Map集合中返回调用处。
+            map.put("id", PrefUtils.getString("LOGIN_ID", null, context));
+            map.put("password", PrefUtils.getString("LOGIN_PASSWARD", null, context));
+        }
+        return map;
+    }
+
+    /**
+     * 将对话框中的输入数据保存到SP中
+     * @param context
+     * @return
+     */
+    public void saveUserLoginInfo( String id, String password,Context context) {
+        MySQLiteHelper mySQLiteHelper = new MySQLiteHelper(context);
+        HashMap<String, String> map = new HashMap<>();
+        if (null == PrefUtils.getString("id", null, context)) {
+            PrefUtils.putString("LOGIN_ACCOUNT", id, context);
+            PrefUtils.putString("LOGIN_PASSWARD", password, context);
+        }
     }
 }

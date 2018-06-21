@@ -21,139 +21,231 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                style="@style/eleApply_secNav_text_style"
-                android:text="用户信息"
-                android:textStyle="bold"/>
-
-            <View style="@style/mStyle_spilt1"/>
-
             <LinearLayout
-                style="@style/eleApply_item_style"
-                android:orientation="horizontal">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
                 <TextView
-                    style="@style/eleApply_blackText_style"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="姓名" />
+                    style="@style/eleApply_secNav_text_style"
+                    android:text="考情"
+                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/name_detaile"
-                    style="@style/eleApply_edittext_style"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="--"/>
+                <View style="@style/mStyle_spilt1" />
+
+                <LinearLayout
+                    style="@style/eleApply_item_style"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/eleApply_blackText_style"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="账号" />
+
+                    <TextView
+                        android:id="@+id/account01"
+                        style="@style/eleApply_edittext_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="--" />
+                </LinearLayout>
+
+                <View style="@style/mStyle_spilt1" />
+
+                <LinearLayout
+                    style="@style/eleApply_item_style"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/eleApply_blackText_style"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="密码" />
+
+                    <TextView
+                        android:id="@+id/password01"
+                        style="@style/eleApply_edittext_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="--" />
+                </LinearLayout>
             </LinearLayout>
 
-            <View style="@style/mStyle_spilt1"/>
+            <View style="@style/mStyle_spilt1" />
 
             <LinearLayout
-                style="@style/eleApply_item_style"
-                android:orientation="horizontal">
+                android:id="@+id/erp_ll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="invisible">
 
                 <TextView
-                    style="@style/eleApply_blackText_style"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="性别" />
+                    style="@style/eleApply_secNav_text_style"
+                    android:text="ERP系统"
+                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/sex_detaile"
-                    style="@style/eleApply_edittext_style"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="--"/>
+                <View style="@style/mStyle_spilt1" />
+
+                <LinearLayout
+                    style="@style/eleApply_item_style"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/eleApply_blackText_style"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="账号" />
+
+                    <TextView
+                        android:id="@+id/account02"
+                        style="@style/eleApply_edittext_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="--" />
+                </LinearLayout>
+
+                <View style="@style/mStyle_spilt1" />
+
+                <LinearLayout
+                    style="@style/eleApply_item_style"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/eleApply_blackText_style"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="密码" />
+
+                    <TextView
+                        android:id="@+id/password02"
+                        style="@style/eleApply_edittext_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="--" />
+                </LinearLayout>
             </LinearLayout>
 
-            <View style="@style/mStyle_spilt1"/>
+            <View style="@style/mStyle_spilt1" />
 
             <LinearLayout
-                style="@style/eleApply_item_style"
-                android:orientation="horizontal">
+                android:id="@+id/email_ll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="invisible">
 
                 <TextView
-                    style="@style/eleApply_blackText_style"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="工号" />
+                    style="@style/eleApply_secNav_text_style"
+                    android:text="润和邮箱"
+                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/identity_detaile"
-                    style="@style/eleApply_edittext_style"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="--"/>
+                <View style="@style/mStyle_spilt1" />
+
+                <LinearLayout
+                    style="@style/eleApply_item_style"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/eleApply_blackText_style"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="账号" />
+
+                    <TextView
+                        android:id="@+id/account03"
+                        style="@style/eleApply_edittext_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="--" />
+                </LinearLayout>
+
+                <View style="@style/mStyle_spilt1" />
+
+                <LinearLayout
+                    style="@style/eleApply_item_style"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/eleApply_blackText_style"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="密码" />
+
+                    <TextView
+                        android:id="@+id/password03"
+                        style="@style/eleApply_edittext_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="--" />
+                </LinearLayout>
             </LinearLayout>
 
-            <View style="@style/mStyle_spilt1"/>
+            <View style="@style/mStyle_spilt1" />
 
             <LinearLayout
-                style="@style/eleApply_item_style"
-                android:orientation="horizontal">
+                android:id="@+id/yunzhijia_ll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="invisible">
 
                 <TextView
-                    style="@style/eleApply_blackText_style"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="密码" />
+                    style="@style/eleApply_secNav_text_style"
+                    android:text="云之家"
+                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/birthday_detaile"
-                    style="@style/eleApply_edittext_style"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="--"/>
+                <View style="@style/mStyle_spilt1" />
+
+                <LinearLayout
+                    style="@style/eleApply_item_style"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/eleApply_blackText_style"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="账号" />
+
+                    <TextView
+                        android:id="@+id/account04"
+                        style="@style/eleApply_edittext_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="--" />
+                </LinearLayout>
+
+                <View style="@style/mStyle_spilt1" />
+
+                <LinearLayout
+                    style="@style/eleApply_item_style"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/eleApply_blackText_style"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="密码" />
+
+                    <TextView
+                        android:id="@+id/password04"
+                        style="@style/eleApply_edittext_style"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="--" />
+                </LinearLayout>
             </LinearLayout>
 
-            <View style="@style/mStyle_spilt1"/>
-
-            <LinearLayout
-                style="@style/eleApply_item_style"
-                android:orientation="horizontal">
-
-                <TextView
-                    style="@style/eleApply_blackText_style"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="邮箱" />
-
-                <TextView
-                    android:id="@+id/degree_detaile"
-                    style="@style/eleApply_edittext_style"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="--"/>
-            </LinearLayout>
-
-            <View style="@style/mStyle_spilt1"/>
-
-            <LinearLayout
-                style="@style/eleApply_item_style"
-                android:orientation="horizontal">
-
-                <TextView
-                    style="@style/eleApply_blackText_style"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="联系电话" />
-
-                <TextView
-                    android:id="@+id/telephone_detaile"
-                    style="@style/eleApply_edittext_style"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="--"/>
-            </LinearLayout>
-
-            <View style="@style/mStyle_spilt1"/>
-
+            <View style="@style/mStyle_spilt1" />
 
             <Button
                 android:id="@+id/btn_call_detaile"

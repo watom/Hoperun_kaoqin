@@ -1,4 +1,4 @@
-package com.watom999.www.hoperun;
+package com.watom999.www.hoperun.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -1,4 +1,4 @@
-package com.watom999.www.hoperun;
+package com.watom999.www.hoperun.activity;
 
 import android.app.Activity;
 import android.os.Bundle;

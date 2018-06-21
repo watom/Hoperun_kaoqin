@@ -5,6 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.design.widget.Snackbar;
+import android.util.Log;
+import android.widget.GridLayout;
+import android.widget.Toast;
+
 import com.watom999.www.hoperun.entity.UserInfoEntity;
 import com.watom999.www.hoperun.utils.Logout;
 
@@ -18,25 +23,25 @@ import java.util.HashMap;
 public class MySQLiteHelper {
     public static final String DB_NAME = "uers_info";//数据库名称
     public static final String DB_TABLE_NAME = "login_info";//数据表名称
-    public static final int VERSION = 1;//版本 更新的时候有用,一般无用
     public static SQLiteDatabase dbInstance;
+    private StringBuffer loginTableCreate;
+    public static final int VERSION = 2;//修改版本号，可调用onUpgrade方法来更新数据库。
     private MyDBHelper myDBHelper;//帮助类,创建表字段
-    private StringBuffer tableCreate;
     private Context context;
 
     public MySQLiteHelper(Context context)
     {
         this.context = context;
+        openDatabase();
     }
-
+    /**
+     * 创建并打开或者直接打开数据库。
+     */
     public void openDatabase() {
-        //创建数据库
         if (dbInstance == null) {
             myDBHelper = new MyDBHelper(context, DB_NAME, VERSION);
             //如果DB_NAME数据库不存在，就先创建数据库，再获取可读可写的数据库对象；如果数据库存在，就直接打开数据库对象。
             dbInstance = myDBHelper.getWritableDatabase();
-            //如果存储空间（内部存储）满了，那么只能返回只读数据库对象。
-            myDBHelper.getReadableDatabase();
         }
     }
 
@@ -46,31 +51,48 @@ public class MySQLiteHelper {
      */
     public long insert(UserInfoEntity o) {
         ContentValues values = new ContentValues();
-        values.put("Login_account", o.getLogin_account());
-        values.put("Login_password", o.getLogin_password());
+        values.put("login_account", o.getLogin_account());
+        values.put("login_password", o.getLogin_password());
         values.put("page_id", o.getPage_id());
         return dbInstance.insert(DB_TABLE_NAME, null, values);
     }
 
     /**
+     * 修改数据库中的一条数据，若失败返回-1
+     * @return 失败返回-1
+     */
+    public void alter(String whichpage,String account,String password) {
+//        dbInstance.execSQL("update "+DB_TABLE_NAME+" set "+value+"=? where page_id=?",new Object[]{key});
+        ContentValues values = new ContentValues();
+        values.put("login_account", account);
+        values.put("login_password", password);
+        dbInstance.update(DB_TABLE_NAME, values, "page_id=?", new String[]{whichpage});
+    }
+//    // 根据用户名，修改密码
+//    public void dbUpdatePassword(String username, String newPassword) {
+//        String sql = "update t_user set password=? where username=? and isDel=0";
+//        Object bindArgs[] = new Object[] { newPassword, username };
+//    }
+    /**
      * 获得数据库中所有的用户，将每一个用户放到一个map中去，然后再将map放到list里面去返回
      * @return list
      */
-    public ArrayList<HashMap<String, Object>> getUserInfo() {
+    public HashMap<String, Object> getUserLoginInfo(String local_page_id) {
         Cursor cursor = null;
-        ArrayList<HashMap<String, Object>> list = new ArrayList<>();
-        cursor = dbInstance.query(DB_TABLE_NAME, new String[] { "_id",
-                        "login_account", "login_password","page_id"}, null,
-                null, null,null, null);
-        while (cursor.moveToNext()) {
-            HashMap<String, Object> item = new HashMap<String, Object>();
-            item.put("_id", cursor.getInt(cursor.getColumnIndex("_id")));
-            item.put("login_account", cursor.getString(cursor.getColumnIndex("login_account")));
-            item.put("login_password",cursor.getString(cursor.getColumnIndex("login_password")));
-            item.put("page_id",cursor.getString(cursor.getColumnIndex("page_id")));
-            list.add(item);
+       HashMap<String, Object> map = new HashMap<>();
+        String sql = "select * from "+ DB_TABLE_NAME+" where page_id=? ";
+        String[] selectionArgs = new String[] { local_page_id };
+        cursor = dbInstance.rawQuery(sql, selectionArgs);
+        if(cursor!=null) {
+            while (cursor.moveToNext()) {
+                String remote_page_id = cursor.getString(cursor.getColumnIndex("page_id"));
+                if (remote_page_id.equals(local_page_id)) {
+                    map.put("login_account", cursor.getString(cursor.getColumnIndex("login_account")));
+                    map.put("login_password", cursor.getString(cursor.getColumnIndex("login_password")));
+                }
+            }
         }
-        return list;
+        return map;
     }
 
     /**
@@ -90,18 +112,17 @@ public class MySQLiteHelper {
         public void onCreate(SQLiteDatabase db) {
             Logout.d("已经创建了数据库DB_NAME");
             //创建的数据表DB_TABLE_NAME
-            tableCreate = new StringBuffer();
-            tableCreate.append("create table ").append(DB_TABLE_NAME)
+            loginTableCreate = new StringBuffer();
+            loginTableCreate.append("create table ").append(DB_TABLE_NAME)
                     .append(" (")
                     .append("_id integer primary key autoincrement,")
-                    .append("user_ID text,").append("user_name text").append("login_account text").append("login_password text").append("page_id text")
+                    .append("page_id varchar(64),").append("login_time varchar(64),").append("login_account varchar(64),").append("login_password varchar(64)")
                     .append(")");
-            System.out.println(tableCreate.toString());
-            db.execSQL(tableCreate.toString()); //执行SQL语句创建数据表
+            db.execSQL(loginTableCreate.toString()); //执行SQL语句创建数据表
         }
 
         /**
-         * 当数据库DB_NAME的版本号变大时，会调用此方法。版本号表小时不会调用此方法，因为数据库不能降级。
+         * 当数据库DB_NAME的版本号变大时，会调用此方法。版本号变小时不会调用此方法。
          * @param db
          * @param oldVersion
          * @param newVersion

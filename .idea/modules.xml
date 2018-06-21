@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/HopeRun.iml" filepath="$PROJECT_DIR$/HopeRun.iml" />
+      <module fileurl="file://D:\DownLoad_D\CommitCode\Now_developing\Hoperun_kaoqin\HopeRun.iml" filepath="D:\DownLoad_D\CommitCode\Now_developing\Hoperun_kaoqin\HopeRun.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Hoperun_kaoqin.iml" filepath="$PROJECT_DIR$/Hoperun_kaoqin.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

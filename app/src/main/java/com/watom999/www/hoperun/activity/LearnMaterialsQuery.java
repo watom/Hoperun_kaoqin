@@ -1,4 +1,4 @@
-package com.watom999.www.hoperun;
+package com.watom999.www.hoperun.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

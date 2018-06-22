@@ -14,7 +14,7 @@ import android.support.v7.app.AppCompatActivity;
  *@UpDate: 1、建立自己的数据库和云端保存个人搜集的感兴趣的东西
  ***********************************************/
 
-public class LearnMaterialsQuery extends AppCompatActivity {
+public class SetTimeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

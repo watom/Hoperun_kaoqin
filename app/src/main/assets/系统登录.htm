@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0043)http://ehr.hoperun.com:8018/HRIS/Loginx.jsp -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>系统登录</title>
+
+    <link rel="Shortcut Icon" href="http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/kylogo.ico">
+    <link rel="stylesheet" type="text/css" href="./系统登录_files/logincss.css">
+    <script language="javascript" type="text/javascript">
+        window.onload = function() {
+            var dwClientHeight = document.body.clientHeight, dwHeight = window.screen.availHeight;
+            try {
+                if (!frameElement) {
+                    window.moveTo(-4, -4);
+                    window.resizeTo(window.screen.availWidth + 8, window.screen.availHeight + 8);
+                    dwClientHeight = document.body.clientHeight;
+                }
+            }
+            catch (e) {
+                dwClientHeight = dwHeight - 200;
+            }
+            document.getElementById('clientHeight').value = dwClientHeight;
+
+            try {
+                var tbuser = document.getElementById("userid");
+                tbuser.focus();
+                tbuser.select();
+            } catch (e) { }
+        }
+
+        function changeLang(lgid) {
+            setCookie('lgid', lgid);
+            location.href = location.href.replace(/\blgid\=\d+/i, "");
+        }
+        function setCookie(c_name, value) {
+            document.cookie = c_name + "=" + escape(value) + "; expires=Mon, 31 Jan 3200 16:00:00 UTC; path=/";
+        }
+        function getCookie(c_name) {
+            if (document.cookie.length > 0) {
+                c_start = document.cookie.indexOf(c_name + "=")
+                if (c_start != -1) {
+                    c_start = c_start + c_name.length + 1
+                    c_end = document.cookie.indexOf(";", c_start)
+                    if (c_end == -1) c_end = document.cookie.length
+                    return unescape(document.cookie.substring(c_start, c_end))
+                }
+            }
+            return ""
+        }
+        document.cookie = "ky__L=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/"; //删除ky__L
+        function onfmsubmit() {
+            var o = document.getElementById('pwd');
+            if (o) {
+                o.value = o.value.replace(/</g, '[_kY_lt]');
+            }
+        }
+        //安卓调用JS的接口
+	    function androidLoginInterface(id,password){
+	      document.getElementById("userid').value=id;
+	      document.getElementById('pwd').value=password;
+	   	}
+
+
+    </script>
+    <script src="./系统登录_files/Custom.js.下载" type="text/javascript"></script>
+</head>
+
+<body class="" style="display: block">
+<link href="./系统登录_files/custom.css" rel="stylesheet" type="text/css">
+<div class="language_mod">
+    <div style="position: absolute; top: 0px; right: 50px; margin-right: 50px;">
+
+    </div>
+</div>
+<div class="login_bg">
+    <div class="kylogo"></div>
+    <span class="span01">
+            E-HR</span> <span class="span02">
+                人力资源信息系统</span>
+</div>
+<center>
+    <div class="logbody_bg" id="logbody_star">
+        <div class="logbody">
+            <div class="denglu">
+                登录
+            </div>
+            <form id="Login" method="post" onsubmit="onfmsubmit()"
+                  onkeydown="SubmitKeyClick(event)">
+                <table id="Table1" name="Table1" border="0" class="middle_tb" align="center">
+                    <tbody>
+                    <tr>
+                        <td align="right">帐号：</td>
+                        <td style="width:230px;padding-top: 2px;">
+                            <div class="loginput">
+                                <div class="picle"></div>
+                                <div class="picce"><input id="userid" name="userid" type="text"
+                                                          autocomplete="on" class="ainput" value="">
+                                </div>
+                                <div class="picri"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">密码：</td>
+                        <td style="width:230px;padding-top: 2px;">
+                            <div class="loginput">
+                                <div class="picle"></div>
+                                <div class="picce"><input id="pwd" name="pwd" type="password"
+                                                          autocomplete="on" class="ainput" value="">
+                                </div>
+                                <div class="picri"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"></td>
+                        <td style="line-height: 50px;text-align: center;width:230px"><input
+                                style="MARGIN-TOP: 10px; CURSOR: pointer" class="buttonstyle"
+                                value="登录" type="submit" name="ctl02">&nbsp;&nbsp;
+                            <a class="gba"
+                               href="http://ehr.hoperun.com:8018/HRIS/GetBackPassword.do?lgid=2052"
+                               style="display:inline">忘记密码</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <input type="hidden" value="" name="screenHeight" id="screenHeight">
+                <input type="hidden" value="584" name="clientHeight" id="clientHeight">
+                <input type="hidden" value="1" id="isess" name="isess">
+                <input type="hidden" id="languagelist" name="languagelist">
+            </form>
+        </div>
+    </div>
+    <div class="copyright">
+        <span id="copyright">版权所有&nbsp;©&nbsp;江苏润和软件股份有限公司</span>
+    </div>
+</center>
+
+
+<script language="javascript" type="text/javascript">
+    function SubmitKeyClick(e) {
+        var va = window.event ? e.keyCode : e.which;
+        if (va == 13) {
+            document.getElementById("Login").submit();
+        }
+    }
+
+
+</script>
+
+<div id="qb-sougou-search" style="display: none; opacity: 0;"><p>搜索</p>
+    <p class="last-btn">复制</p>
+    <iframe src="./系统登录_files/saved_resource.html"></iframe>
+</div>
+</body>
+</html>

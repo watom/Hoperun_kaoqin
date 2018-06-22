@@ -1,0 +1,3385 @@
+/**
+ * @author finian_liu@kingdee.com
+ */
+
+////////////////////////////////////////////////////////////
+// Third Libraries
+////////////////////////////////////////////////////////////
+jQuery.ajaxSetup({
+	contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+	cache: false
+});
+
+
+// Get first child. Implementation form prototype library
+jQuery.fn._firstChild = function() {
+	var el = this[0] && this[0].firstChild;
+	while (el && el.nodeType != 1) {
+		el = el.nextSibling;
+	}
+	return jQuery(el);
+}; 
+
+
+/* Simple JavaScript Inheritance
+ * By John Resig http://ejohn.org/
+ * MIT Licensed.
+ */
+// Inspired by base2 and Prototype
+(function(){
+  var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
+  // The base Class implementation (does nothing)
+  this.Class = function(){};
+  
+  // Create a new Class that inherits from this class
+  Class.extend = function(prop) {
+    var _super = this.prototype;
+    
+    // Instantiate a base class (but only create the instance,
+    // don't run the init constructor)
+    initializing = true;
+    var prototype = new this();
+    initializing = false;
+    
+    // Copy the properties over onto the new prototype
+    for (var name in prop) {
+      // Check if we're overwriting an existing function
+      prototype[name] = typeof prop[name] == "function" && 
+        typeof _super[name] == "function" && fnTest.test(prop[name]) ?
+        (function(name, fn){
+          return function() {
+            var tmp = this._super;
+            
+            // Add a new ._super() method that is the same method
+            // but on the super-class
+            this._super = _super[name];
+            
+            // The method only need to be bound temporarily, so we
+            // remove it when we're done executing
+            var ret = fn.apply(this, arguments);        
+            this._super = tmp;
+            
+            return ret;
+          };
+        })(name, prop[name]) :
+        prop[name];
+    }
+    
+    // The dummy class constructor
+    function Class() {
+      // All construction is actually done in the init method
+      if ( !initializing && this.init )
+        this.init.apply(this, arguments);
+    }
+    
+    // Populate our constructed prototype object
+    Class.prototype = prototype;
+    
+    // Enforce the constructor to be what we expect
+    Class.constructor = Class;
+
+    // And make this class extendable
+    Class.extend = arguments.callee;
+    
+    return Class;
+  };
+})();
+
+/*
+ * Object.create
+ */
+if (typeof Object.create !== 'function') {
+	(function(){
+		function F(){}
+		Object.create = function(o) {
+			F.prototype = o;
+			return new F();
+		};
+	})();
+}
+
+/*
+ * IE6缓存背景
+ */
+if (!window.XMLHttpRequest) {
+	try {  
+		document.execCommand('BackgroundImageCache', false, true);
+    } catch(e){}  
+}
+
+
+
+////////////////////////////////////////////////////////////
+// Google统计封装
+// 相关issue：KSSP-2765
+////////////////////////////////////////////////////////////
+var __gtrack = function(type) {
+//	if (__debug) {
+//		return;
+//	}
+	
+	var $ = jQuery, pageview = type;
+	
+	//[m,finian,110705] 按照新的规范来处理
+	if (type instanceof $.Event) {
+		pageview = $(type.target).closest('a').attr('href');
+	} else if (type instanceof $) {
+		pageview = type.attr('href');
+	}
+	
+	//加上networkId
+	var networkId =  (S.sessionUser &&  S.sessionUser.networkId) ? S.sessionUser.networkId : '';
+	pageview = networkId + location.pathname + location.search + pageview; 
+	
+	_gaq.push(['_trackPageview', pageview]);
+	
+//	switch(type) {
+//		//// 微博 ////
+//	
+//		// 发布
+//    	// 目标：发布最多的用户
+//    	// 代码：onclick="_gaq.push(['_trackEvent', 'microblog', 'issue']);"
+//		case 'post':
+//			//_gaq.push(['_trackPageview', '#4GA_TRENDS']);
+//			_gaq.push(['_trackEvent', 'microblog', 'issue']);
+//			break;
+//			
+//		// 转发
+//		// 目标：转发最多的用户
+//	    // 代码：onclick="_gaq.push(['_trackEvent', 'microblog', 'forward']);"
+//		case 'forward':
+//			_gaq.push(['_trackEvent', 'microblog', 'forward']);
+//			break;
+//			
+//		// 回复
+//	    // 目标： 回复最多的用户
+//	    // 代码：onclick="_gaq.push(['_trackEvent', 'microblog' 'replay']);"
+//		case 'reply':
+//			_gaq.push(['_trackEvent', 'microblog', 'replay']);
+//			break;
+//			
+//		// 喜欢
+//		// 目标： 最受欢迎的用户
+//	    // 代码：onclick="_gaq.push(['_trackEvent', 'microblog', 'like']);"
+//		case 'like':
+//			_gaq.push(['_trackEvent', 'microblog', 'like']);
+//			break;
+//		
+//		//// 文档 ////
+//		// 下载
+//	    // 目标：下载最多的文档； 下载文档最多的用户 
+//	    // 代码：onclick="_gaq.push(['_trackEvent', 'document', 'download']); _gaq.push(['_trackEvent', 'document', 'download_user']);"
+//		// [110701]目前涉及到文档下载的文件包括：doc-home.jsp, msgattach.jspf, docpreview.js, message.js
+//		case 'download':
+//			_gaq.push(['_trackEvent', 'document', 'download']);
+//			_gaq.push(['_trackEvent', 'document', 'download_user']);
+//			break;
+//	}
+	
+};
+
+
+
+////////////////////////////////////////////////////////////
+// Platform
+////////////////////////////////////////////////////////////
+
+var K = {$:jQuery};
+
+/*==================== Shortcuts ====================*/
+var __noop = jQuery.noop;
+
+
+K.isIE6 = function() {
+	return !window.XMLHttpRequest;
+};
+
+
+/*==================== Debug ====================*/
+//var __debug = true;
+var __console = {
+	noop: __noop,
+	console: window.console,
+	prefix: '[KLOG]',
+	methods: 'group,groupEnd,trace,debug,info,warn,error,fatal',
+	init: function() {
+		var methodArray = this.methods.split(','),
+			i, numMethodArray = methodArray.length, method;
+		for (i = 0; i < numMethodArray; i++) {
+			method = methodArray[i];
+			// IE8似乎有console对象，但它的方法，比如typeof console.info是object，所以没有apply方法
+			// 这里需要排除这种情况
+			if (typeof __debug !== 'undefined' && __debug === true && this.console && this.console[method] && this.console[method].apply) {
+				this[method] = this.generateMethod(method);
+			} else {
+				this[method] = this.noop;
+			}
+		}
+	},
+	generateMethod: function(method) {
+		return function() {
+			Array.prototype.unshift.call(arguments, this.prefix);
+			this.console[method].apply(this.console, arguments);
+		};
+	}
+};
+__console.init();
+
+/*==================== Textarea Helper ====================*/
+// inspired by Blank Zheng (planabc.net)
+K.TextareaHelper = {
+	$: jQuery,
+	
+	getCaret: function(textarea) {
+		var rangeData = {text: "", start: 0, end: 0};
+	
+		if (textarea.setSelectionRange) { // W3C	
+			//textarea.focus();
+			rangeData.start= textarea.selectionStart;
+			rangeData.end = textarea.selectionEnd;
+			rangeData.text = (rangeData.start != rangeData.end) ? textarea.value.substring(rangeData.start, rangeData.end): "";
+		} else if (document.selection) { // IE
+			try {
+				//textarea.focus();
+				var i,
+					oS = document.selection.createRange(),
+					// Don't: oR = textarea.createTextRange()
+					oR = document.body.createTextRange();
+				oR.moveToElementText(textarea);
+				
+				rangeData.text = oS.text;
+				//[commented,finian,110414]
+				//rangeData.bookmark = oS.getBookmark();
+				
+				// object.moveStart(sUnit [, iCount]) 
+				// Return Value: Integer that returns the number of units moved.
+				for (i = 0; oR.compareEndPoints('StartToStart', oS) < 0 && oS.moveStart("character", -1) !== 0; i++) {
+					// Why? You can alert(textarea.value.length)
+					if (textarea.value.charAt(i) == '\r' ) {
+						i++;
+					}
+				}
+				rangeData.start = i;
+				rangeData.end = rangeData.text.length + rangeData.start;
+			} catch (e) {}
+		}
+		
+		return rangeData;
+	},
+	
+	setCaret: function(textarea, rangeData) {
+		var oR, start, end;
+		if(!rangeData) {
+			__console.error("[K.TextareaHelper.setCaret] You must get cursor position first.");
+		}
+		textarea.focus();
+		try {
+			if (textarea.setSelectionRange) { // W3C
+				/*
+				 *	last modify by deyang_xing
+				 *	date: 201312021552 
+				 */
+				
+				if($.browser.msie && rangeData.start != rangeData.end){
+					setTimeout(function(){
+						textarea.setSelectionRange(rangeData.start, rangeData.end);
+					},500);
+					return;
+				}
+				textarea.setSelectionRange(rangeData.start, rangeData.end);
+			} else if (textarea.createTextRange) { // IE
+				oR = textarea.createTextRange();
+				
+				// Fixbug : ues moveToBookmark()
+				// In IE, if cursor position at the end of textarea, the set function don't work
+				//[commented,finian,110414]
+				/*if(textarea.value.length === rangeData.start) {
+					oR.collapse(false);
+					oR.select();
+				} else {
+					oR.moveToBookmark(rangeData.bookmark);
+					oR.select();
+				}*/
+				
+				//[added,finian,110414]
+				oR.collapse(true);  
+				oR.moveStart('character', rangeData.start);  
+				oR.moveEnd('character', rangeData.end - rangeData.start);  
+				oR.select();
+			}
+		} catch (e) {}
+	},
+	
+	insert: function(textarea, rangeData, text) {
+		var oValue, nValue, oR, sR, nStart, nEnd, st;
+		this.setCaret(textarea, rangeData);
+		
+		if (textarea.setSelectionRange) { // W3C
+			oValue = textarea.value;
+			nValue = oValue.substring(0, rangeData.start) + text + oValue.substring(rangeData.end);
+			nStart = nEnd = rangeData.start + text.length;
+			st = textarea.scrollTop;
+			textarea.value = nValue;
+			// Fixbug:
+			// After textarea.values = nValue, scrollTop value to 0
+			if(textarea.scrollTop != st) {
+				textarea.scrollTop = st;
+			}
+			textarea.setSelectionRange(nStart, nEnd);
+		} else if (textarea.createTextRange) { // IE
+			sR = document.selection.createRange();
+			sR.text = text;
+			sR.setEndPoint('StartToEnd', sR);
+			sR.select();
+		}
+	},
+	
+	caretOffset: function(textarea, proxyId, rangeData) {
+		if (typeof proxyId !== 'string') {
+			return;
+		}
+		
+		var $ = this.$;
+		if (textarea.setSelectionRange) { // W3C
+			var $ta = $(textarea), $proxy = $('#' + proxyId);
+			if ($proxy.length == 0) {
+				var stylePt = $ta.css('padding-top'),
+					stylePr = $ta.css('padding-right'),
+					stylePb = $ta.css('padding-bottom'),
+					stylePl = $ta.css('padding-left'),
+					styleFf = $ta.css('font-family'),
+					styleFs = $ta.css('font-size'),
+					styleFw = $ta.css('font-weight'),
+					styleLh = $ta.css('line-height'),
+					styleW = $ta.css('width'),
+					styleH = $ta.css('height');
+					
+				//__console.info(stylePt,stylePr,stylePb,stylePl,styleFf,styleFs,styleFw,styleLh,styleW,styleH);
+				
+				$proxy = $('<div />')
+					.attr('id', proxyId)
+					.css({
+						//'visibility': 'visible',
+						//'background-color': '#fff',
+						'visibility': 'hidden',
+						'position': 'absolute',
+						'left': 0,
+						'top': 0,
+						'text-align': 'left',
+						'word-wrap': 'break-word',
+						'overflow-y': 'auto',
+						'overflow-x': 'hidden',
+						
+						'padding-top': stylePt,
+						'padding-right': stylePr,
+						'padding-bottom': stylePb,
+						'padding-left': stylePl,
+						'font-family': styleFf,
+						'font-size': styleFs,
+						'font-weight': styleFw,
+						'line-height': styleLh,
+						'width': styleW,
+						'height': styleH
+					})
+					.appendTo('body');
+			}
+			
+			var inputVal =  $ta.val(),
+				textPart1 = inputVal.substring(0, rangeData.start),
+				textPart2 = inputVal.substring(rangeData.end);
+			
+			textPart1 = textPart1.replace(/ /g, '&nbsp;');
+			textPart1 = textPart1.replace(/<|>/g, '=');
+			textPart1 = textPart1.replace(/\n/g, '<br />');
+			textPart2 = textPart2.replace(/ /g, '&nbsp;');
+			textPart2 = textPart2.replace(/<|>/g, '=');
+			textPart2 = textPart2.replace(/\n/g, '<br />');
+			
+			$proxy.html(textPart1 + '<span class="proxy-caret"></span>' + textPart2);
+			
+			var offset = $proxy.find('.proxy-caret').offset();
+			return {
+				left: offset.left,
+				top: offset.top - $ta.scrollTop()
+			};
+		} else if (document.selection) { // IE
+			var r = document.selection.createRange(), $win = $(window), $ta = $(textarea), taOffset = $ta.offset();
+			return {
+				left: r.offsetLeft + $win.scrollLeft() - taOffset.left,
+				top: r.offsetTop + $win.scrollTop() - taOffset.top
+			};
+		}
+	}
+};
+
+/*==================== Ajax Request ====================*/
+K.sessionTimeout = false;
+K.req = function(cfg) {
+	if (K.sessionTimeout === true) {
+		return;
+	}
+	
+	var $ = this.$,
+		errorText = cfg.errorText || '操作失败',
+		type = cfg.type || 'GET',
+		dataType = cfg.dataType || 'json',
+		s = cfg.s || $.noop, f = cfg.f, e = cfg.e, c = cfg.c || $.noop, scope = cfg.scope || window,
+		// 绑定组件。如果请求绑定组件，则请求开始前和结束后调用相应接口
+		//XXX 待验证多个请求时组件的绑定逻辑
+		bindUI = cfg.bindUI, bindBtn = cfg.bindBtn;
+		
+	K.req.before(bindUI);
+	if (cfg.b) {
+		cfg.b.call(scope);
+	}
+	K.req.bindBtn(bindBtn);
+	
+	$.ajax({
+		async: typeof cfg.async !== 'undefined' ? cfg.async : true,
+		url: cfg.url,
+		type: type,
+		data: cfg.data,
+		dataType: dataType,
+		success: function(resp) {
+			K.req.removeBindBtn(bindBtn);
+			if (dataType == 'json') {
+				if (resp.success === true) {
+					s.call(scope, resp);
+				} else if (resp.error && resp.error.code === 'resource_quota_exceeded') {
+					/** 资源不足提示 */
+					if (!cfg.noDialog) {
+						K.ResQuotaTip(resp.resourceQuota, cfg.callback, resp);
+					} else if (cfg.onFailed && cfg.onFailed.call) {
+						cfg.onFailed.call(scope, resp);
+					}
+					
+				} else if (f && f.call) {
+					f.call(scope, resp);
+				} else {
+					K.error({msg:errorText});
+				}
+			} else {
+				s.call(scope, resp);
+			}
+		},
+		error: function(xhr, textStatus) {
+//			new window.ajaxExceptionTrace({
+//				exception: xhr.status || textStatus,
+//				url: '异步接口地址:' + cfg.url
+//			});
+			K.req.removeBindBtn(bindBtn);
+			//[finian,110517]
+			// 现在会话超时返回401代码，内容为：{"success":false,"sessiontimeout":true}
+			if (xhr.status == 401) {
+				K.sessionTimeout = true;
+				K.error({
+					msg: '会话超时，请重新登录',
+					onClose: function() {
+						// window.location.href = S.url();
+						window.location.reload();
+					}
+				});
+			}
+			else if(xhr.status == 413){
+				K.error({msg:'请清理浏览器缓存后操作'});
+			}
+			else if (e && e.call) {
+				e.call(scope);
+			} else if (textStatus == 'parsererror') { 
+				K.error({msg:'服务器异常，请稍后再试'});
+			} else if (textStatus == 'timeout') {
+				K.error({msg:'网络连接超时，请稍后再试'});
+			} else if (xhr.status == 404) {
+				K.error({msg:'连接服务器失败，可能网络繁忙，请稍后再试'});
+			} else if(xhr.status == 0) {
+				;//KSSP-2978: 如果快速跳转其它页面(此时原页面DOM已不存在),前端脚步异常,返回:status==0,则什么都不做.Fuyx,2011-07-08
+			} else {
+				K.error({msg:errorText + ' - 服务异常'});
+			}
+		},
+		complete: function() {
+			K.req.after(bindUI);
+			c.call(scope);			
+		}
+	});
+};
+K.req.before = function(bindUI) {
+	this.eachUI(bindUI, function(ui) {
+		if (ui && ui.requesting) {
+			ui.requesting();
+		}
+	});
+};
+K.req.after = function(bindUI) {
+	this.eachUI(bindUI, function(ui) {
+		if (ui && ui.requested) {
+			ui.requested();
+		}
+	});
+};
+K.req.bindBtn = function(bindBtn){
+	if(!bindBtn) return;
+	this.eachUI(bindBtn, function(btn) {
+		var $btn = jQuery(btn),
+			origClass = $btn.attr('class'), newClass = '', arrClass;
+		if(!origClass){
+			newClass = 'btn';
+		}else if(origClass.indexOf(' ') != -1) {
+			arrClass = origClass.split(/\s+/);
+			newClass = arrClass[0];
+		}else {
+			newClass = origClass;
+		}
+		this.requestingClass = newClass + '-requesting';
+		$btn.addClass(this.requestingClass);
+	});
+};
+K.req.removeBindBtn = function(bindBtn) {
+	if(!bindBtn) return;
+	this.eachUI(bindBtn, function(btn) {
+		jQuery(btn).removeClass(this.requestingClass);
+	});
+};
+K.req.eachUI = function(uis, handler) {
+	if (!jQuery.isArray(uis)) {
+		uis = [uis];
+	}
+	
+	var i, len = uis.length, ui;
+	for (i = 0; i < len; i++) {
+		ui = uis[i];
+		handler(ui);
+	}
+};
+K.req.loadImg = function(url, fn){
+	var img = new Image();
+	img.src = url;
+	if (img.complete) {
+		fn.call(img);
+	} else {
+		img.onload = function() {
+			fn.call(img);
+			img.onload = null;//KSSP-2649: IE6动画时存在多个帧,每个帧都会触发一次onload事件.Fuyx,2011-08-17
+		};
+	};
+};
+
+
+/*==================== StringBuilder ====================*/
+K.StringBuilder = function(str) {
+	this.array = [];
+	if (str != null) {
+		this.array.push(str);
+	}
+};
+K.StringBuilder.prototype = {
+	append: function(str) {
+		this.array.push(str);
+	},
+	toString: function() {
+		return this.array.join('');
+	}
+};
+K.str = function() {
+	return Array.prototype.join.call(arguments, '');
+};
+
+K.addIframe = function(parent,width,height){
+	if(!parent) return;
+	var iframe = document.createElement("iframe");
+	iframe.setAttribute("frameborder","0");
+	iframe.setAttribute("allowtransparency","true");
+	iframe.className="iframe";
+	if(width!=undefined)iframe.style.width=width+"px";
+	if(height!=undefined)iframe.style.height=height+"px";
+	parent.appendChild(iframe);
+};
+
+K.addSimpleIframe = function(parent){
+	var $parent = this.$(parent);
+	K.addIframe(parent, parseInt($parent.width()), parseInt($parent.height()));
+};
+
+/*==================== SimpleTemplate ====================*/
+K.SimpleTemplate = function() {
+	this.parts = [];
+	this._pushAll(arguments);
+};
+K.SimpleTemplate.prototype = {
+	_: function() {
+		this._pushAll(arguments);
+		return this;
+	},
+	
+	toString: function() {
+		return this.parts.join('');
+	},
+	
+	_pushAll: function(arr) {
+		var i, n = arr.length;
+		for (i = 0; i < n; i++) {
+			this.parts.push(arr[i]);
+		}
+	}
+};
+
+K.ucfirst = function(str) {
+	return str.substring(0,1).toUpperCase() + str.substring(1);
+};
+K.String = {
+	getRealLength: function(str){
+		return (str || '').replace(/[^\x00-\xff]/g,"**").length;
+	},
+	//url 算10个字符，其它按一个字符返回
+	getInputLength: function(input){
+		var reg = new RegExp(K.Pattern.url,'gi'); 
+		var urlList = input.match(reg)||[];
+		var len = 0, tempStr = input;
+		for(var i=0; i<urlList.length; i++ ){
+			tempStr = tempStr.replace(urlList[i],'');
+			len += 10;
+		}
+		len += tempStr.length;
+		return len;
+	},
+	ucFirst: function(str){
+		return str.substring(0,1).toUpperCase() + str.substring(1);
+	},
+	//截取中英文字符长度
+	getShortStr: function(str, n ,suffix){
+		if (!str) return '';
+		var len = str.length, relLen = 0, i, s, index = 0;
+		for(i=0; i<len; i++){
+			s = str.charAt(i);
+			if(/[^\x00-\xff]/.test(s)){
+				if(relLen + 2 > n) break;
+				relLen += 2; index++;
+			}else{
+				relLen++; index++;
+			}
+			if(relLen >= n) break;
+		}
+		
+		var result = str.substring(0, index);
+		if(index < len-1 && suffix){
+			result += suffix;
+		}
+		return result;
+	},
+	
+	// 不区分中英文截取字符
+	getShortIgnore: function(str, len, suffix){
+		if(!str) return '';
+		var l = str.length, suffix = suffix || '...';
+		if(l > len){
+			str = str.substring(0, len) + suffix ;
+		}
+		return str;
+	},
+	
+	//获取邮箱后缀(简易)
+	getEmailDomain: function(str) {
+		if(!str) return '';
+		var i = str.indexOf('@'), domain = str.substring(i);
+		return domain;
+	},
+	
+	/* 为URL地址添加链接  http://t.k.com -> <a href="http://t.k.com">http://t.k.com</a>*/
+	replaceUrlAsLink: function(text, title, target) {
+		var regex = /(http\:\/\/([\w.]+)(\/[\w-\.\/\?%&=]*)?)/gi;
+		return typeof text == "string" ? text.replace(regex, '<a href="$1" title="'+ (title || '$1') +'" target="' + (target || '_blank') + '">$1</a>') : text;
+	},
+	
+	/** HTML实体代码转成显示的字符串 */
+	htmlToString: function(str){
+		var entity = ['&lt;', '&gt;', '&amp;', '&quot;'],
+		html = ['<', '>', '&', '"'],
+		len = entity.length, reg;
+		for(var i=0; i<len; i++){
+			reg = new RegExp(entity[i], 'g');
+			str = str.replace(reg, html[i]);
+		}
+		return str;
+	},
+	
+	/** 将字符串转换成html实体 */
+	htmlEntities: function(str){
+		if(typeof str === 'undefined') return '';
+		return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+	},
+	
+	checkEmail: function(str) {
+		var reg = /^[_a-zA-Z0-9-]+(\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,4})$/; // 正确的邮箱地址
+		return reg.test(str);
+	},
+	
+	checkEmailPrefix: function(str) {
+		var reg = /^[_a-zA-Z0-9-]+(\.[_a-zA-Z0-9-]+)*$/; // 邮箱前缀
+		return reg.test(str);
+	},
+	
+	checkPhoneOnly: function (str) {
+		var reg = /^((\d{7,8})|(\d{4}|\d{3})-(\d{7,8})|(\d{4}|\d{3})-(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1})|(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1}))$/; // Only座机
+		return reg.test(str);
+	},
+	
+	checkPhone: function (str) {
+		var reg = /^((\d{11})|^((\d{7,8})|(\d{4}|\d{3})-(\d{7,8})|(\d{4}|\d{3})-(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1})|(\d{7,8})-(\d{4}|\d{3}|\d{2}|\d{1}))$)$/; // 手机、座机
+		return reg.test(str);
+	},
+	
+	checkMobilePhone: function(str){
+		var reg = /(^1\d{10}$)/;
+		return reg.test(str); 
+	},
+
+	// 国际号码
+	checkInterMobilePhone: function(str){
+		var reg = /(^(\d{1,11})$)/;
+		return reg.test(str); 
+	},
+	
+	/*云号*/
+	checkCloudAccount: function(str) {
+		var reg = /^\d{4,11}$/;
+		return reg.test(str);
+	},
+	
+	/** 清除左空格 */
+	ltrim: function(str){
+		return str.replace(/^\s+/, '');
+	},
+	
+	/** 清除右空格 */
+	rtrim: function(str){
+		return str.replace(/\s+$/, '');
+	},
+	
+	/** 清除头尾空格 */
+	trim: function(str){
+		return this.rtrim(this.ltrim(str));
+	}
+};
+
+/** ====== 截取带链接的字符串 For短邮 =============================================== */
+K.StringForHtml = {
+	regLink: /<a\b[^>]*>([^<]*)<\/a>/gi,
+	regImg: /<img[^>]*>/gi,
+	regBr: /<br\s?\/?>/gi,
+	
+	subString: function(content, len){
+		var originalContent = content, 
+			linkArr=[], imgArr=[], 
+			linkIndex = 0, imgIndex = 0,
+			me = this;
+		content = content.replace(this.regBr, '\n');  // 回车改成换行
+		content = content.replace(this.regLink, function(linkStr, plainStr){    // 替换链接
+			linkArr.push(linkStr);
+			var returnStr = me.repeatStr(plainStr.length, '¤');
+			return '|' + returnStr + '|';
+		});
+		content = content.replace(this.regImg, function(imgStr){     // 替换图片
+			imgArr.push(imgStr);
+			return '|♂|';
+		});  
+		if(content.lenght <= len) return originalContent;
+		
+		content = content.substring(0, len);
+		content = content.replace(/\|¤+$/, '');
+		content = content.replace(/\|♂$/, '');         // 清除被截断的链接替换符
+		content = content.replace(/\|¤+\|/g, function(){         // 替换回链接
+			return linkArr[linkIndex++];
+		});
+		content = content.replace(/\|♂\|/g, function(){          // 替换回图片
+			return imgArr[imgIndex++];
+		});
+		content = content.replace(/\n/g, '<br />');              // 替换回回车
+		return content;
+	},
+	
+	repeatStr: function(len, str){
+		var s = '';
+		for(var i=0; i<len; i++){
+			s += str;
+		}
+		return s;
+	},
+	
+	getPlainLength: function(content){
+		content = content.replace(this.regBr, '\n');
+		content = content.replace(this.regLink, "|$1|");
+		content = content .replace(this.regImg, '|♂|');
+		return content.length;
+	}
+};
+
+K.Url = {
+		/*
+		 * 获取URL参数 getQueryStr(url)
+		 * 例如 URL = http://t.kingdee.com/index.jsp?x=1&y=2
+		 * 则 getQueryStr(url)返回{x:'1',y:'2'}
+		 */
+		getQueryStr: function(url){
+			if(url.indexOf('?')<=0){return null;};
+		    var queryStr = url.split('?')[1];
+		    var result = {};
+			var p = queryStr.split('&');
+		    for(var i=0;i<p.length;i++){
+			  result[p[i].split('=')[0]] = p[i].split('=')[1];
+		    }
+		    return result;
+		},
+		
+		/*
+		 * 给url添加或修改参数addQueryStr(url ,obj)
+		 * obj为一json对象，如{x:'1',y:'2'}。
+		 */
+		addQueryStr: function(url,obj){
+			if(url.indexOf('?')<=0){url += '?';}
+			for(var s in obj){
+			    var newQuery = '&' + s + '=' + obj[s];
+			    var regex = eval('/[&]?' + s + '=[^&]*/');
+			    url = url.replace(regex, '');
+			    url += newQuery;
+			}
+			return url;
+		},
+		/*
+		 * 删除url中的某个或某组参数 delQueryStr(url,attr)
+		 * 其中attr参数可以是string也可以是数组。
+		 */
+		delQueryStr: function(url,attr){
+			var attrList = typeof(attr) == "string" ? new Array(attr) : attr;
+			for(var a in attrList){
+				var regex = eval('/[&]?' + attrList[a] + '=[^&]*/');
+				url = url.replace(regex, '');
+			}
+			return url;
+			
+		}
+};
+
+K.Pattern = {
+	url: "(http[s]?://[a-zA-Z0-9!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]*)(\s)*"
+};
+
+//共用，显示名字链接
+K.profileUserName = function(userId, userName){
+	return' <a title="'+userName+'" href="/microblog/'+userId+'/profile" data-userid="'+userId+'" class="namecard">'+userName+'</a>';
+};
+//共用，显示头像链接
+K.profileUserImg = function(userId, userName, photoId, spec, avatarClass){
+	userId = userId||'';
+	userName = userName||'';
+	photoId = photoId||'';
+	spec = spec||'50';
+	avatarClass = avatarClass||'avatar-small';
+	return '<a href="/microblog/'+userId+'/profile" data-userId="'+userId+'" class="namecard"><img alt="'+userName+'" src="/space/c/photo/load?id='+photoId+'&amp;spec='+spec+'" class="'+avatarClass+'" /></a>';
+};
+
+/**
+ * K.Browser 存储浏览器类型和版本
+ * ex. 调用K.Browser.ie 要么返回undefined要么或者版本号
+ * 
+ */
+(function(){
+	K.Browser = {}; 
+	var ua = navigator.userAgent.toLowerCase(),s; 
+	(s = ua.match(/msie ([\d.]+)/)) ? K.Browser.ie = s[1] : 
+	(s = ua.match(/firefox\/([\d.]+)/)) ? K.Browser.firefox = s[1] : 
+	(s = ua.match(/chrome\/([\d.]+)/)) ? K.Browser.chrome = s[1] : 
+	(s = ua.match(/opera.([\d.]+)/)) ? K.Browser.opera = s[1] : 
+	(s = ua.match(/version\/([\d.]+).*safari/)) ? K.Browser.safari = s[1] : 0; 
+	ua.match(/ipad/i) ? K.Browser.isiPad = true :
+	ua.match(/iphone os/i) ? K.Browser.isiPhone = true :
+	ua.match(/android/i) ? K.Browser.isAndroid = true : 0;
+			
+})();
+
+//判断客户端浏览器是否安装了flash插件
+K.hasFlashPlugin= function(){
+	if(K.Browser.ie){
+		try { 
+	        var swf=new ActiveXObject("ShockwaveFlash.ShockwaveFlash"); 
+	        return true;
+		} catch(e) { 
+	        return false;
+	    } 
+	}else{
+		 return navigator.plugins["Shockwave Flash"] ? true: false; 
+	}
+};
+
+
+// 延迟执行函数，如果在延迟时间到达之前该方法再被调用，则之前的函数取消执行
+K.delayRace = (function() {
+	var timer = 0;
+	return function(fn, ms){
+		window.clearTimeout(timer);
+		timer = window.setTimeout(fn, ms);
+	};
+})();
+
+K.throttle = function(func, wait) {
+	var context, args, timeout, result,
+		previous = 0;
+	
+	var later = function() {
+		previous = new Date;
+		timeout = null;
+		result = func.apply(context, args);
+	};
+	return function() {
+		var now = new Date,
+			remaining = wait - (now - previous);
+		
+		context = this;
+		args = arguments;
+		if (remaining <= 0) {
+			clearTimeout(timeout);
+			timeout = null;
+			previous = now;
+			result = func.apply(context, args);
+		} else if (!timeout) {
+			timeout = setTimeout(later, remaining);
+		}
+		return result;
+	};
+};
+
+// 获取对象的属性，支持链式声明式，如K.getObjProp({a:{a1:1,a2:2}}, 'a.a1');
+K.getObjProp = function(obj, propChain) {
+	if (typeof propChain !== 'string') {
+		return;
+	}
+	
+	var props = propChain.split('.'), i = 0, len = props.length, prop, o = obj;
+	for (; i < len; i++) {
+		prop = props[i];
+		if (o){
+			o = o[prop];
+		} else {
+			break;
+		}
+	}
+
+	return o;
+};
+
+K.getMapKeys = function(map, seperators) {
+	var key, keys = [];
+	for (key in map) {
+		keys.push(key);
+	}
+	
+	return (typeof seperators === 'undefined') ? keys : keys.join(seperators);
+};
+
+K.numChar = function(str, c) {
+	var i, len = str.length, _c, num = 0;
+	for (i = 0; i < len; i++) {
+		_c = str.charAt(i);
+		if (_c == c) {
+			num++;
+		}
+	}
+	return num;
+};
+
+// Format
+K.format = {
+	// 按照格式提取对象的相关属性
+	// 比如对象是{a:1,b:2,c:3}，格式为'{a}_{b}-{c}'，则提取结果为'1_2-3'
+	objProps: function(obj, format) {
+		return format.replace(/{([\w.]+)}/g, function(matched, prop) {
+			if (obj) {
+				// 支持属性的链式声明式获取
+				return K.getObjProp(obj, prop) || '';
+			}
+			return '';
+		});
+	},
+	
+	dateNum: function(num) {
+		return num < 10 ? '0' + num : num;
+	},
+	
+	//格式化微博时间显示格式.Fuyx,2011-05-26
+	date: function(dateObj, sysDate, isDetail) {
+		if(null == dateObj || !dateObj instanceof Date){
+			return "";
+		}
+		if(!sysDate){
+			__console.warn('[K.format.date()] The argument [sysDate] must not be null. The arg[0]\'s: ', dateObj);
+			__console.info('[K.format.date()] Using now instead of ', sysDate);
+			sysDate = new Date();
+		}
+		if(sysDate < dateObj){
+			__console.warn('[K.format.date()] The argument [sysDate: ', sysDate, '] less then the argument [dateObj: ', dateObj, ']?');
+			__console.info('[K.format.date()] Using ', dateObj, ' instead of ', sysDate);
+			sysDate = dateObj;
+		}
+		var curYear = sysDate.getFullYear(), curMonth = sysDate.getMonth()+1, curDate = sysDate.getDate(),
+			curHour = sysDate.getHours(), curMinute = sysDate.getMinutes(),
+			curStamp = sysDate.getTime(),
+			mbYear = dateObj.getFullYear(), mbMonth = dateObj.getMonth()+1, mbDate = dateObj.getDate(),
+			mbHour = dateObj.getHours(), mbMinute = dateObj.getMinutes(),
+			mbSeconds = dateObj.getSeconds(),
+			mbStamp = dateObj.getTime(),
+			_d = K.format.dateNum, 
+			dateStamp = 24 * 60 * 60 * 1000;  // 一天的时间戳
+		if(curYear > mbYear){//往年
+			return [mbYear, '年', _d(mbMonth), '月', _d(mbDate), '日'].join('');//yyyy年MM月dd日
+		}
+		if(curYear == mbYear){//当前年
+			//if(curStamp - mbStamp < 7 * dateStamp){
+				if(mbMonth == curMonth && mbDate == curDate) {//一天之内
+					if (isDetail) {
+						return [_d(mbHour), ':', _d(mbMinute), ':', _d(mbSeconds)].join('');//HH:mm:ss
+					} else {
+						if(mbHour == curHour){//一小时内
+							if(mbMinute == curMinute){//当前分钟
+								var sc = sysDate.getSeconds()-dateObj.getSeconds();
+								return [sc <= 0 ? 2 : sc, '秒前'].join('');//15秒前.[KSSP-2681,Fuyx,2011-06-29.]
+							}
+							return [curMinute-mbMinute, '分钟前'].join('');//8分钟前
+						} 					
+						return [_d(mbHour), ':', _d(mbMinute)].join('');//HH:mm
+					}
+				}
+				//return Math.ceil((curStamp - mbStamp)/dateStamp) + '天前';
+			//}
+			
+			return [_d(mbMonth), '月', _d(mbDate), '日', ' ', _d(mbHour), ':', _d(mbMinute)].join('');//MM月dd日 HH:mm
+		}
+	},
+	
+	/**
+	 * 按指定格式显示时间
+	 * @param string stamp UNIX时间戳 
+	 * @param string format 时间格式
+	 * @param boolean zero 数字前是否有前导0,默认为有
+	 * 
+	 * yyyy - 4位数年份
+	 * mm - 月份
+	 * dd - 日期
+	 * hh - 小时
+	 * ii - 分
+	 * ss - 秒
+	 * 默认格式为：yyyy-mm-dd hh:ii:ss
+	 */
+	normalDate: function(stamp, format, zero){
+		var stamp = Number(stamp),
+			date = new Date(stamp), formatDate,
+			format = format ? format : "yyyy-mm-dd hh:ii:ss",
+			zero = (zero === undefined) ? true : zero,
+			_d = zero ? K.format.dateNum : function(s){return s;};
+		
+		var year = _d(date.getFullYear()),
+			month = _d(date.getMonth() + 1),
+			day = _d(date.getDate()),
+			hour = _d(date.getHours()),
+			minute = _d(date.getMinutes()),
+			second = _d(date.getSeconds());
+		
+		formatDate = format.replace(/yyyy/i, year).replace(/mm/i, month).replace(/dd/i, day)
+					.replace(/hh/i, hour).replace(/ii/i, minute).replace(/ss/i, second);
+		return formatDate;
+	},
+	
+	fileSize: function (size) {
+		if(!size){
+			return '';
+		}
+		if (size < 1024) {
+			return size + 'B';
+		} else if (size < 1048576) {
+			return (size / 1024).toFixed(2) + 'KB';
+		} else {
+			return (size / 1048576).toFixed(2) + 'MB';
+		}
+	}
+};
+
+//
+K.buildMarkupProps = function(propObj) {
+	var props = [], propName, val, ret = '';
+	for (propName in propObj) {
+		val = propObj[propName];
+		if (propName == 'class' && val.length > 0) {
+			props.push('class="' + val.join(' ') + '"');
+		} else if (propName == 'style' && val.length > 0) {
+			props.push('style="' + val.join(';') + '"');
+		} else {
+			props.push(propName + '="' + val + '"');
+		}
+	}
+	
+	if (props.length > 0) {
+		ret = ' ' + props.join(' ');
+	}
+	
+	return ret;
+};
+
+K.docImgErrorHandler = function($imgs) {
+	var me = this, $ = this.$, thumbCls = 'doc-icon-thumb';
+	window.setTimeout(function() {
+		$imgs.each(function() {
+			var $me = $(this), url = $(this).attr('rel');	// + '&t=' + (new Date().getTime());
+			if ($me.data('thumbnail-ready') != true) {
+				K.docImgReady(url, function() {
+					if (this.width <= 1) {
+						$me.closest('a').hide();
+						$me.closest('div.doc-thumb').removeClass(thumbCls).addClass(thumbCls);
+					} else {
+						$me.attr('src', url);
+					}
+				}, function() {
+					
+				}, function() {
+					__console.warn('img load error: ', url);
+					$me.data('thumbnail-ready', true);
+					$me.closest('a').hide();
+					$me.closest('div.doc-thumb').removeClass(thumbCls).addClass(thumbCls);
+				});
+			}
+
+		});
+	}, 0);
+	
+};
+
+K.docImgReady = (function () {
+	var list = [], intervalId = null,
+
+	// 用来执行队列
+	tick = function () {
+		var i = 0;
+		for (; i < list.length; i++) {
+			list[i].end ? list.splice(i--, 1) : list[i]();
+		};
+		!list.length && stop();
+	},
+
+	// 停止所有定时器队列
+	stop = function () {
+		clearInterval(intervalId);
+		intervalId = null;
+	};
+
+	return function (url, ready, load, error) {
+		var onready, width, height, newWidth, newHeight,
+			img = new Image();
+		
+		img.src = url;
+
+		// 如果图片被缓存，则直接返回缓存数据
+		if (img.complete) {
+			ready.call(img);
+			load && load.call(img);
+			return;
+		};
+		
+		width = img.width;
+		height = img.height;
+		
+		// 加载错误后的事件
+		img.onerror = function () {
+			error && error.call(img);
+			onready.end = true;
+			img = img.onload = img.onerror = null;
+		};
+		
+		// 图片尺寸就绪
+		onready = function () {
+			newWidth = img.width;
+			newHeight = img.height;
+			if (newWidth !== width || newHeight !== height ||
+				// 如果图片已经在其他地方加载可使用面积检测
+				newWidth * newHeight > 1024
+			) {
+				ready.call(img);
+				onready.end = true;
+			};
+		};
+		onready();
+		
+		// 完全加载完毕的事件
+		img.onload = function () {
+			// onload在定时器时间差范围内可能比onready快
+			// 这里进行检查并保证onready优先执行
+			!onready.end && onready();
+		
+			load && load.call(img);
+			
+			// IE gif动画会循环执行onload，置空onload即可
+			img = img.onload = img.onerror = null;
+		};
+
+		// 加入队列中定期执行
+		if (!onready.end) {
+			list.push(onready);
+			// 无论何时只允许出现一个定时器，减少浏览器性能损耗
+			if (intervalId === null) intervalId = setInterval(tick, 40);
+		};
+	};
+})();
+/*==================== Layer and Dialog ====================*/
+/* Layer */
+K.Layer = Class.extend({
+	init: function(cfg) {
+		this._$elem = null;
+		this._$overlay = null;
+		this._$body = null;
+		this._$arrow = null;
+		
+		// whether open by default
+		this._defaultOpen = (typeof cfg.defaultOpen === 'undefined') ? false : cfg.defaultOpen;
+	
+		// id & css class
+		this._id = cfg.id;
+		this._cls = cfg.cls;
+		
+		// shim
+		this._shim = (typeof cfg.shim === 'undefined') ? true : cfg.shim;
+		if(K.isIE6()) this._shim = false;
+		
+		// modal
+		this._modal = (typeof cfg.modal === 'undefined') ? false : cfg.modal;
+		
+		// border
+		this._border = (typeof cfg.border === 'undefined') ? true : cfg.border;
+		
+		// padding
+		this._padding = (typeof cfg.padding === 'undefined') ? K.Layer.defaultPadding : cfg.padding;
+		
+		// arrow (1~12)
+		this._arrow = (typeof cfg.arrow === 'undefined' || typeof cfg.arrow !== 'number' || cfg.arrow < 1 || cfg.arrow > 12) ? 0 : cfg.arrow;
+		
+		// positions
+		this._x = cfg.x || 'center';
+		this._y = cfg.y || 'center';
+		this._rel = (cfg.rel && cfg.rel.length > 0) ? cfg.rel : null;  // 相对于某个元素定位，可传入id,class或dom元素
+		this._relPos = cfg.relPos || ''; // 快捷方式，定义相对位置，取值：top|right|bottom|left。设置rel时才有效
+		this._relMargin = (typeof cfg.relMargin === 'undefined') ? 10 : cfg.relMargin; // 定义相对位置的间隔，单位像素。设置relPos时才有效
+		
+		// autoClose
+		this._autoClose = (typeof cfg.autoClose === 'undefined') ? 0 : cfg.autoClose;
+		
+		// openEffect
+		this._openEffect = cfg.openEffect || 'show';
+		
+		// closeEffect
+		this._closeEffect = cfg.closeEffect || 'hide';
+		
+		// onClose
+		this._onClose = cfg.onClose || __noop;
+		
+		// scope
+		this._scope = cfg.scope || this;
+		this._onScopeChange();
+		
+		// contents
+		this._body = cfg.body;
+		
+		// stop propagations
+		this._stopPropagations = cfg.stopPropagations || [];
+		
+		// 当调用open时是否重新计算z-index
+		this._resetZIndex = (typeof cfg.resetZIndex === 'undefined') ? false : cfg.resetZIndex;
+		
+		// dimensions
+		this._width = (typeof cfg.width === 'undefined') ? 0 : cfg.width;
+		this._height = (typeof cfg.height === 'undefined') ? 0 : cfg.height;
+		
+		// 是否用fixed定位
+		this.posFixed = (typeof cfg.posFixed === 'undefined') ? false : cfg.posFixed;
+		
+		this.highZindex = (typeof cfg.highZindex === 'undefined') ? false : cfg.highZindex;
+		
+		// build
+		this.build();
+	},
+	
+	$: jQuery,
+	
+	tpl: function() {
+		var t = new K.SimpleTemplate(), rootProps = {}, mainProps = {}, bdStyle = '';
+		
+		// root
+		if (this._id) {
+			rootProps.id = this._id;
+		}
+		
+		rootProps['class'] = ['layer'];
+		if (this._shim) {
+			rootProps['class'].push('layer-shim');
+			rootProps['class'].push('br5');
+			if(this._modal) rootProps['class'].push('layer-shim-overlay');
+		}
+		if (this._cls) {
+			rootProps['class'].push(this._cls);
+		}
+		
+		rootProps['style'] = ['display:none', 'z-index:' + K.Layer.zIndex(this._modal || this.highZindex)];
+		if(this.posFixed && !K.isIE6()) {
+			rootProps['style'].push('position:fixed');
+		}
+		
+		if (this._width != 0) {
+			rootProps['style'].push('width:' + this._width + 'px');
+		}
+		if (this._height != 0) {
+			rootProps['style'].push('height:' + this._height + 'px');
+		}
+		
+		// layer-main
+		mainProps['class'] = ['layer-main'];
+		mainProps['style'] = [];
+		
+		// layer-main style
+		if (this._border === false) {
+			mainProps['style'].push('border:0 none');
+		} else if (typeof this._border === 'string') {
+			mainProps['style'].push('border:' + this._border);
+		}
+		
+		// layer-bd style
+		if (this._padding != K.Layer.defaultPadding) {
+			bdStyle = ' style="padding:' + this._padding + 'px"';
+		}
+		
+		// template
+		t._('<div', K.buildMarkupProps(rootProps), '>')
+			._('<div', K.buildMarkupProps(mainProps), '>');
+			
+			if (this._arrow !== 0) {
+				t._('<span class="layer-arrow p', this._arrow, '"></span>');
+			}
+				t._(this.hdTpl());
+				
+				t._('<div class="layer-bd"', bdStyle, '>', this._body, '</div>');
+				
+				t._(this.ftTpl());
+				
+			t._('</div>')
+		._('</div>');
+		
+		return t.toString();
+	},
+	
+	build: function() {
+		if (this._modal) {
+			this.buildOverlay();
+		}
+		
+		this._$elem = this.$(this.tpl());		
+		this._$elem.appendTo('body');
+		
+		// handle stop propations
+		var i, len = this._stopPropagations.length, eventType;
+		for (i = 0; i < len; i++) {
+			eventType = this._stopPropagations[i];
+			this._$elem.bind(eventType, function(e){
+				e.stopPropagation();
+			});
+		}
+		
+		this._$main = this._$elem.find('.layer-main').first();
+		this._$body = this._$elem.find('.layer-bd').first();
+		
+		if (this._arrow != 0) {
+			this._$arrow = this._$elem.find('.layer-arrow').first();
+		}
+		
+		this.onDomReady();
+		
+		this.locate();
+		
+		if (this._defaultOpen === true) {
+			this.open();
+		}
+	},
+	
+	buildOverlay: function() {
+		var style = 'display:hidden;z-index:' + K.Layer.zIndex(true);
+		
+		// IE6
+		if (K.isIE6()) {
+			style += ';height:' + this.$('body').height() + 'px';
+		}
+		
+		this._$overlay = this.$('<div class="overlay" style="' + style + '"></div>');
+		this._$overlay.appendTo('body');
+		K.addIframe(this._$overlay[0], parseInt(this._$overlay.width()), parseInt(this._$overlay.height()));
+	},
+	
+	locate: function() {
+		if (!this._$elem) {
+			return;
+		}
+		
+		// 判断是否相对于其他元素
+		if (this._rel == null) { // 相对于body
+			var $win = this.$(window);
+			if (this._x == 'center') {
+				if($win.width() > this._$elem.outerWidth()){
+					this._$elem.css('left', Math.ceil(($win.width() - this._$elem.outerWidth()) / 2) + $win.scrollLeft() + 'px');
+				}else{
+					this._$elem.css('right', '10px');
+				}
+			} else {
+				this._$elem.css('left', this._x + 'px');
+			}
+			
+			if (this._y == 'center') {
+				if($win.height() >= this._$elem.outerHeight()){
+					this._$elem.css('top', Math.ceil(($win.height() - this._$elem.outerHeight()) / 2) + $win.scrollTop() + 'px');
+				}else{
+					this._$elem.css('top', 10 + $win.scrollTop() + 'px');
+				}
+			} else {
+				this._$elem.css('top', this._y + 'px');
+			}
+		} else { // 相对于$rel
+			var $rel = this.$(this._rel), relOffset = $rel.offset(), relMargin = this._relMargin,
+				elemWidth = this._$elem.outerWidth(), elemHeight = this._$elem.outerHeight(),
+				relWidth = $rel.outerWidth(), relHeight = $rel.outerHeight();
+			
+			if (this._relPos == '') { // 使用x,y定位
+				this._$elem
+					.css('left', relOffset.left + this._x + 'px')
+					.css('top', relOffset.top + this._y + 'px');
+			} else { // 使用快捷方式定位
+				switch(this._relPos) {
+					case 'top':
+						this._$elem
+							.css('left', relOffset.left - Math.ceil((elemWidth - relWidth) / 2) + 'px')
+							.css('top', relOffset.top - elemHeight - relMargin + 'px');
+						break;
+					case 'right':
+						this._$elem
+							.css('left', relOffset.left + relWidth + relMargin + 'px')
+							.css('top', relOffset.top - Math.ceil((elemHeight - relHeight) / 2) + 'px');
+						break;
+					case 'bottom':
+						this._$elem
+							.css('left', relOffset.left - Math.ceil((elemWidth - relWidth) / 2) + 'px')
+							.css('top', relOffset.top + relHeight + relMargin + 'px');
+						break;
+					case 'left':
+						this._$elem
+							.css('left', relOffset.left - elemWidth - relMargin + 'px')
+							.css('top', relOffset.top - Math.ceil((elemHeight - relHeight) / 2) + 'px');
+						break;
+				}
+			}
+		}
+		
+		// 是否需要重设z-index
+		if (this._resetZIndex === true) {
+			this._$elem.css('z-index', K.Layer.zIndex(this._modal || this.highZindex));
+		}
+	},
+	
+	open: function(relocate) {
+		if (this._needLocate === true || relocate === true) {
+			this.locate();
+		}
+		
+		this._showElem(this._$overlay);
+		this._showElem(this._$elem, true);
+		
+		if (this._autoClose > 0) {
+			window.setTimeout(this.$.proxy(this, 'close'), this._autoClose);
+		}
+		
+		this._needLocate = false;
+	},
+	
+	close: function(destroy) {
+		destroy = (typeof destroy === 'undefined') ? false : destroy;
+		
+		this._hideElem(this._$elem, true);
+		this._hideElem(this._$overlay);
+		
+		if (destroy === true) {
+			this._destroyElem(this._$elem);
+			this._destroyElem(this._$overlay);
+			this._$elem = null;
+			this._$overlay = null;
+		}
+	},
+	
+	_showElem: function(_$elem, effect) {
+		if (_$elem) {
+			if (effect === true) {
+				if (this._openEffect == 'show') {
+					_$elem.show();
+				} else if (this._openEffect == 'slide') {
+					_$elem.stop(true, true).show('slide', {direction:'down'}, 'fast');
+				} else {
+					_$elem.stop(true, true);
+					_$elem[this._openEffect]('fast');
+				}
+			} else {
+				_$elem.show();
+			}
+		}
+	},
+	_hideElem: function(_$elem, effect) {
+		if (_$elem) {
+			if (effect === true) {
+				if (this._closeEffect == 'hide') {
+					_$elem.hide();
+					this._onClose.call(this._scope);
+				} else if (this._closeEffect == 'slide') {
+					_$elem.stop(true, true).hide('slide', {direction:'down'}, 'fast', this._onCloseWithScope);
+				} else {
+					_$elem.stop(true, true);
+					_$elem[this._closeEffect]('fast', this._onCloseWithScope);
+				}
+			} else {
+				_$elem.hide();
+			}
+		}
+	},
+	_destroyElem: function(_$elem) {
+		if (_$elem) {
+			_$elem.remove();
+		}
+	},
+	
+	getBody$: function() {
+		return this._$body;
+	},
+	
+	getRoot$: function(){
+		return this._$elem;
+	},
+	getArrow$: function(){
+		return this._$arrow;
+	},
+	
+	body: function(content) {
+		if (typeof content === 'undefined') {
+			return this._body;
+		}
+		
+		this._body = content;
+		this._$body.html(this._body);
+	},
+	
+	arrow: function(arrow) {
+		if (typeof arrow === 'undefined') {
+			return this._arrow;
+		}
+		
+		if (typeof arrow === 'number' && arrow >= 1 && arrow <= 12) {
+			if (this._$arrow == null) {
+				this._$arrow = this.$('<span class="layer-arrow p' + arrow + '"></span>');
+				this._$arrow.insertBefore(this._$body);
+			} else {
+				this._$arrow.removeClass('p' + this._arrow).addClass('p' + arrow);
+			}
+			
+			this._arrow = arrow;
+		}
+	},
+	width: function(width) {
+		if (typeof width === 'undefined') {
+			return this._width;
+		}
+		
+		this._width = width;
+		var newVal = this._width == 'auto' ? '' : this._width + 'px';
+		this._$elem.css('width', newVal);
+		
+		if (this._x == 'center') {
+			this._needLocate = true;
+		}
+		
+	},
+	height: function(height) {
+		if (typeof height === 'undefined') {
+			return this._height;
+		}
+		
+		this._height = height;
+		var newVal = this._height == 'auto' ? '' : this._height + 'px';
+		this._$elem.css('height', newVal);
+		
+		if (this._y == 'center') {
+			this._needLocate = true;
+		}
+	},
+	x: function(x) {
+		if (typeof x === 'undefined') {
+			return this._x;
+		}
+		
+		this._x = x;
+		this._needLocate = true;
+	},
+	y: function(y) {
+		if (typeof y === 'undefined') {
+			return this._y;
+		}
+		
+		this._y = y;
+		this._needLocate = true;
+	},
+	rel: function(rel) {
+		if (typeof rel === 'undefined') {
+			return this._rel;
+		}
+		
+		this._rel = rel;
+		this._needLocate = true;
+	},
+	relPos: function(relPos) {
+		if (typeof relPos === 'undefined') {
+			return this._relPos;
+		}
+		
+		this._relPos = relPos;
+		this._needLocate = true;
+	},
+	relMargin: function(relMargin) {
+		if (typeof relMargin === 'undefined') {
+			return this._relMargin;
+		}
+		
+		this._relMargin = relMargin;
+		this._needLocate = true;
+	},
+	autoClose: function(autoClose) {
+		if (typeof autoClose === 'undefined') {
+			return this._autoClose;
+		}
+		
+		this._autoClose = autoClose;
+	},
+	openEffect: function(openEffect) {
+		if (typeof openEffect === 'undefined') {
+			return this._openEffect;
+		}
+		
+		this._openEffect = openEffect;
+	},
+	closeEffect: function(closeEffect) {
+		if (typeof closeEffect === 'undefined') {
+			return this._closeEffect;
+		}
+		
+		this._closeEffect = closeEffect;
+	},
+	onClose: function(onClose) {
+		if (typeof onClose === 'undefined') {
+			return this._onClose;
+		}
+		this._onClose = onClose;
+		this._onCloseWithScope = this.$.proxy(this._onClose, this._scope);
+	},
+	scope: function(scope) {
+		if (typeof scope === 'undefined') {
+			return this._scope;
+		}
+		
+		this._scope = scope;
+		this._onScopeChange();
+	},
+	_onScopeChange: function() {
+		this._onCloseWithScope = this.$.proxy(this._onClose, this._scope);
+	},
+	
+	// abstract
+	hdTpl: function() {return '';},
+	ftTpl: function() {return '';},
+	onDomReady: __noop
+});
+
+K.Layer.zIndexCurr = 3000;
+K.Layer.zIndexHighCurr = 5000;
+K.Layer.zIndexStep = 10;
+K.Layer.defaultPadding = 10;
+K.Layer.zIndex = function(isHigh) {
+	if(isHigh) 
+		return K.Layer.zIndexHighCurr += K.Layer.zIndexStep;
+	else
+		return K.Layer.zIndexCurr += K.Layer.zIndexStep;
+};
+
+/* Dialog */
+K.Dialog = K.Layer.extend({
+	
+	// cfg: modal,arrow,x,y,rel,relPos,relMargin,title,headClose,buttons,foot
+	init: function(cfg) {
+		
+		this._$title = null;
+		this._$buttons = [];
+		
+		this._title = (typeof cfg.title === 'undefined') ? '' : cfg.title;
+		this._headClose = (typeof cfg.title === 'undefined') ? true : cfg.headClose;
+		this._destroyOnClose = (typeof cfg.title === 'undefined') ? false : cfg.destroyOnClose;
+		this._buttons = cfg.buttons || [];
+		this._foot = (typeof cfg.foot === 'undefined') ? false : cfg.foot;
+		
+		if (this._buttons.length > 0) {
+			this._foot = true;
+		}
+		
+		cfg.shim = true;
+		cfg.border = true;
+		cfg.padding = K.Layer.defaultPadding;
+		this._super(cfg);
+	},
+	
+	hdTpl: function() {
+		if (this._title === false) {
+			return '';
+		}
+		
+		var t = new K.SimpleTemplate();
+		t._('<div class="layer-hd">')
+			._('<h2>', this._title, '</h2>');
+			
+			if (this._headClose !== false) {
+				t._('<a class="btn-close" title="关闭" href="#"></a>'); // ×
+			}
+			
+		t._('</div>');	
+		return t.toString();
+	},
+	
+	ftTpl: function() {
+		if (this._foot === false) {
+			return '';
+		}
+		
+		var t = new K.SimpleTemplate();
+		t._('<div class="layer-ft">');
+			if (typeof this._foot === 'string') {
+				t._(this._foot);
+			}
+			
+			if (this._buttons.length > 0) {
+				t._(this._buildButtons());
+			}
+		t._('</div>');
+		
+		return t.toString();
+	},
+	
+	onDomReady: function() {
+		var $ = this.$, me = this, handler, $btn;
+		
+		if (this._title !== false) {
+			this._$title = this._$elem.find('.layer-hd > h2').first();
+		}
+		
+		this._$elem.find('.layer-hd .btn-close').click(function(){
+			me.close(me._destroyOnClose);
+			return false;
+		});
+		
+		this._$elem.find('.layer-ft .btn').each(function(index){
+			$btn = $(this);
+			
+			$btn.bind('click', function(){
+				handler = me._buttons[index].click;
+				if (typeof handler === 'function') {
+					handler.call(me, this);
+				}
+				return false;
+			});
+			
+			me._$buttons.push($btn);
+		});
+	},
+	
+	_buildButtons: function() {
+		// assumed this.buttons.length > 0
+		var t = new K.SimpleTemplate(), i, len = this._buttons.length, btnCfg, extraCls;
+		for (i = 0; i < len; i++) {
+			extraCls = '';
+			
+			btnCfg = this._buttons[i];
+			
+			if (btnCfg.em === true) {
+				extraCls += ' em';
+			}
+			if(typeof btnCfg.cls !== 'undefined') {
+				extraCls += ' ' + btnCfg.cls;
+			}
+			
+			t._('<a class="btn', extraCls, '" href="#"><em>', btnCfg.text, '</em></a>');
+		}
+		
+		return t.toString();
+	},
+	
+	title: function(title) {
+		if (typeof title === 'undefined') {
+			return this._title;
+		}
+		
+		this._title = title;
+		this._$title.text(this._title);
+	},
+	
+	updateBtnHandler: function(index, handler) {
+		var scope = this._scope, $btn = this._$buttons[index];
+		if ($btn) {
+			$btn.unbind('click');
+			$btn.bind('click', function(){
+				handler.call(scope, this);
+				return false;
+			});
+		}	
+	}
+});
+
+
+// Dialog Wrapper
+K.DialogMgr = {
+	
+	_instances: {},
+	
+	_BTN: { // button configurations
+		YES: {text:'确定', em:true, click:function(){this.close();}},
+		NO: {text:'取消', click:function(){this.close();}},
+		KNOW: {text:'', cls:'btn-know', click: function(){this.close();}}
+	},
+	
+	_AUTO_CLOSE: 2000,
+	_AUTO_CLOSE_SUCCESS: 1000,
+	_WIDTH: 250,
+	_HANDY_WIDTH: 150,
+	
+	get: function(cfg) {
+		var type = cfg.type;
+		if (!this._instances[type]) {
+			this.build(cfg);
+		}
+		
+		return this._instances[type];
+	},
+	
+	build: function(cfg) {
+		var type = cfg.type, c;
+	    this._BTN.YES.text='确定';
+	    this._BTN.NO.text='取消';
+		
+		switch(type) {
+			case 'alert':
+				c = {cls:'dialog alert', modal:true, title:'提示', buttons:[this._BTN.YES]};
+				break;
+			case 'confirm':
+				c = {cls:'dialog confirm', modal:true, title:'操作确认', buttons:[this._BTN.YES, this._BTN.NO]};
+				break;
+			case 'success':
+				c = {cls:'dialog success', modal:true, title:'操作成功', autoClose:this._AUTO_CLOSE_SUCCESS, buttons:[this._BTN.YES]};
+				break;
+			case 'warn':
+				c = {cls:'dialog warn', modal:true, title:'警告', buttons:[this._BTN.YES]};
+				break;
+			case 'error':
+				c = {cls:'dialog error', modal:true, title:'错误', buttons:[this._BTN.YES]};
+				break;
+				
+			case 'handy-alert':
+				c = {cls:'handy-dialog alert', title:false, autoClose:this._AUTO_CLOSE};
+				break;
+			case 'handy-confirm':
+				c = {cls:'handy-dialog confirm', title:false, buttons:[this._BTN.YES, this._BTN.NO]};
+				break;
+			case 'handy-confirm-customize':
+				c = {cls:'handy-dialog customize', title:false, buttons:[this._BTN.YES, this._BTN.NO]};
+				if(cfg.buttonsText){
+					c.buttons[0].text=cfg.buttonsText[0];
+					c.buttons[1].text=cfg.buttonsText[1];
+				}				
+				break;
+			case 'handy-success':
+				c = {cls:'handy-dialog success', title:false, autoClose:this._AUTO_CLOSE_SUCCESS};
+				break;
+			case 'handy-warn':
+				c = {cls:'handy-dialog warn', title:false, autoClose:this._AUTO_CLOSE};
+				break;
+			case 'handy-error':
+				c = {cls:'handy-dialog error', title:false, autoClose:this._AUTO_CLOSE};
+				break;
+			
+		}
+		
+		c.stopPropagations = cfg.stopPropagations;
+		c.highZindex = (typeof cfg.highZindex === 'undefined') ? true : cfg.highZindex;
+		
+		// 每次打开都应该重新计算z-index
+		c.resetZIndex = true;
+		
+		this._instances[type] = new K.Dialog(c);
+	}
+};
+
+K._dialog = function(cfg) {
+	var dlg = K.DialogMgr.get(cfg), defaultAutoClose = K.DialogMgr._AUTO_CLOSE;
+	
+	if (cfg.type == 'success' || cfg.type == 'handy-success') {
+		defaultAutoClose = K.DialogMgr._AUTO_CLOSE_SUCCESS;
+	}
+	
+	//// Bug：由于是单例，获取实例后，在设置相关成员时需留意是否漏掉重置默认值的操作
+	cfg.scope = cfg.scope || dlg;
+	cfg.onClose = cfg.onClose || __noop;
+	cfg.onYes = cfg.onYes || __noop;
+	cfg.rel = cfg.rel || null;
+	// KSSP-3260 此句导致确认弹出层自动关闭了，确认弹出层不应对外提供autoClose接口
+	// 处理见下面dlg.autoClose(cfg.autoClose);一句
+	cfg.autoClose = cfg.autoClose || defaultAutoClose;
+	cfg.width = cfg.width || (K._dialog.isHandy(cfg.type) ? K.DialogMgr._HANDY_WIDTH : K.DialogMgr._WIDTH);
+	cfg.height = cfg.height || 'auto';
+	////
+
+	dlg.scope(cfg.scope);
+	dlg.width(cfg.width);
+	dlg.height(cfg.height);
+	
+	// handy
+	if (K._dialog.isHandy(cfg.type)) {
+		dlg.body('<b></b><span>' + cfg.msg + '</span>');
+		
+		dlg.arrow(cfg.arrow);
+		dlg.x(cfg.x);
+		dlg.y(cfg.y);
+		dlg.rel(cfg.rel);
+		dlg.relPos(cfg.relPos);
+		dlg.relMargin(cfg.relMargin);
+		
+		switch(cfg.relPos) {
+			case 'top':
+				dlg.arrow(8);
+				break;
+			case 'right':
+				dlg.arrow(11);
+				break;
+			case 'bottom':
+				dlg.arrow(2);
+				break;
+			case 'left':
+				dlg.arrow(5);
+				break;
+		}
+		
+		//[modified,finian,110525]
+		// IE6 handy dialog 使用动画效果时，某些元素显示不正常（如小三角形显示不全）
+		// IE6下暂时不使用动画效果
+		//[updated] 110626 使用jQuery UI的Effect Slide，IE6之前的问题不存在
+		// 动画效果还有一些问题，暂时屏蔽
+		//dlg.openEffect('slide');
+		//dlg.closeEffect('slide');
+		//[/modified]
+		
+		
+		// 对于 handy dialog，如果设置了绑定组件（cfg.bindUI），则open时disable该组件，close时enable该组件
+		if (cfg.bindUI) {
+			K._dialog.bindUI(cfg.bindUI, function(ui) {
+				if (ui && ui.disable && ui.enable) {
+					ui.disable();
+					var origOnClose = cfg.onClose;
+					cfg.onClose = function() {
+						ui.enable();
+						origOnClose.call(this);
+					};
+				}
+			});
+		}
+
+	} else {
+		dlg.x(cfg.x);
+		dlg.y(cfg.y);
+		dlg.body('<i></i><p>' + cfg.msg + '</p>');
+	}
+	
+	// confirm
+	if ((cfg.type == 'confirm' || cfg.type == 'handy-confirm'|| cfg.type == 'handy-confirm-customize')) {
+		dlg.updateBtnHandler(0, cfg.onYes);
+		
+	} else {	// 确认弹出层不应对外提供autoClose接口
+		dlg.autoClose(cfg.autoClose);
+	}
+	
+	// on close
+	dlg.onClose(cfg.onClose);
+	
+	dlg.open();
+	
+	return dlg;
+};
+K._dialog.isHandy = function(type) {
+	return type.substring(0, 6) == 'handy-';
+};
+K._dialog.bindUI = function(uis, handler) {
+	if (!jQuery.isArray(uis)) {
+		uis = [uis];
+	}
+	
+	var i, len = uis.length, ui;
+	for (i = 0; i < len; i++) {
+		ui = uis[i];
+		handler(ui);
+	}
+};
+(function(){
+	var dlgs = [
+		'alert', 'confirm', 'success', 'warn', 'error',
+		'handy-alert', 'handy-confirm', 'handy-success', 'handy-warn', 'handy-error', 'handy-confirm-customize'
+	], i, len = dlgs.length, dlgType;
+	
+	function getMethodName(type) {
+		var tmps = type.split('-'), ret = tmps[0], i, len = tmps.length, tmp;
+		for (i = 1; i < len; i++) {
+			tmp = tmps[i];
+			ret += K.ucfirst(tmp);
+		}
+		
+		return ret;
+	}
+	
+	for (i = 0; i < len; i++) {
+		dlgType = dlgs[i];
+		
+		(function(type) {
+			K[getMethodName(type)] = function(cfg) {
+				cfg.type = type;
+				return K._dialog(cfg);
+			};
+		})(dlgType);
+	}
+})();
+
+
+/**
+ * 新功能提示层
+ */
+K.Tips = K.Layer.extend({
+	// cfg: width, msg, rel, relPos, isKnow, onClose, onKnow, scope
+	init: function(cfg) {
+		var fixParam = {
+			padding: K.Layer.defaultPadding,
+			shim: true,
+			border: true,
+			cls: ' handy-tips',
+			modal: false,
+			defaultOpen: true
+		};
+		
+		this.cfg = $.extend({
+			width: 180,
+			msg: '',
+			rel: null,
+			relPos: '',
+			isKnow: false,
+			onClose: __noop,
+			onKnow: __noop,
+			hideClose: false,
+			posFixed: false,
+			highZindex: false,
+			btnText: '知道了'
+		}, cfg, fixParam);
+		
+		if(this.cfg.isKnow) this.cfg.cls += ' tips-is-know';
+		this.cfg.body = this.cfg.msg || '';
+		this._super(this.cfg);
+	},
+	
+	hdTpl: function() {
+		if (this.cfg.isKnow || this.cfg.hideClose) return '';
+		
+		var t = new K.SimpleTemplate();
+		t._('<div class="layer-hd">')
+				._('<a class="btn-close" title="关闭" href="#"></a>') // ×
+		._('</div>');	
+		return t.toString();
+	},
+	
+	ftTpl: function() {
+		if (!this.cfg.isKnow) return '';
+		
+		var t = new K.SimpleTemplate();
+		t._('<div class="layer-ft">')
+		 	._('<a class="btn em" href="#"><em>', this.cfg.btnText , '</em></a>')
+		 ._('</div>');		
+		return t.toString();
+	},
+	
+	onDomReady: function() {
+		var $ = this.$, me = this, handler;
+		
+		this._$elem.find('.layer-hd .btn-close').click(function(){
+			me.close(true);
+			return false;
+		});
+		
+		this._$elem.find('.layer-ft .btn').click(function(e){
+			handler = me.cfg.onKnow;
+			if(typeof handler === 'function') {				
+				handler.call(me.cfg.scope, me);
+			}
+			e.preventDefault();
+		});
+		
+		this.createArrow();
+	},
+	
+	createArrow: function(){
+		switch(this.cfg.relPos) {
+			case 'top':
+				this.arrow(8);
+				break;
+			case 'right':
+				this.arrow(11);
+				break;
+			case 'bottom':
+				this.arrow(2);
+				break;
+			case 'left':
+				this.arrow(5);
+				break;
+		}
+	}
+	
+});
+
+
+/** 
+ * 
+ * 资源不足提示 
+ * 
+ */
+(function(K, $) {
+	var type2Text = {
+		DISK: '硬盘', 
+		SMS: '短信', 
+		TASK: '任务', 
+		CALENDAR: '日程',
+		USER: '用户',
+		BULLETIN: '公告',
+		ACTIVITY_SCREEN: '微博墙', 
+		PRIVATE_MESSAGE_PARTICIPANT: '短邮参与人数'
+	};
+	
+	/** 通知管理员资源不足 */
+	K.NoticeAdminQuotaNotEnough = function($tg, type, callback) {
+		var me = this,
+			content = '<a href="/microblog/'+ S.sessionUser.id +'/profile" data-userId="'+ S.sessionUser.id +'" class="namecard">' + S.sessionUser.name + '</a> 希望使用' + type + '功能，需要您去<a href="/space/c/paid/home">升级为付费版</a>。';
+		
+		K.req({
+			bindBtn: $tg,
+			type: 'GET',
+			url: '/microblog/rest/send_resource_notice',
+			data: {content: content},
+			s: function(resp) {
+				K.handySuccess({msg: '已给管理员发出通知', rel: $tg, relPos: 'top', onClose: function() {
+					callback && callback.call(me, resp);
+				}});
+			},
+			scope: this
+		});
+	};
+	
+	K.CheckResQuota = function(cfg) {
+		var cfg = cfg || {};
+		K.req({
+			async: typeof cfg.async !== 'undefined' ? cfg.async : true,		// false时为同步请求，会阻塞后面的代码执行。
+			noDialog: cfg.noDialog || false,	// 资源不足时，是否弹出资源不足的提示框（上传附件时，不弹出提示框）
+			onFailed: cfg.onFailed || $.noop,	// 不弹出资源不足提示框时的回调函数
+			callback: cfg.callback || $.noop,	// 弹出资源不足提示框时，关闭提示框时的回调函数
+			type: 'GET',
+			url: '/microblog/rest/check_resource_quota',
+			data: {resource_type: cfg.type},
+			s: function(resp) {
+				cfg.onSuccess && cfg.onSuccess.call(cfg.scope || this, resp);
+			},
+			scope: this
+		});
+	};
+	
+	K.ResQuotaTip = function(resourceQuota, callback, resp) {
+		return new K.ResQuotaTip.prototype.init(resourceQuota, callback, resp);
+	};
+	
+	K.ResQuotaTip.prototype = {
+		constructor: K.ResQuotaTip,
+		init: function(resourceQuota, callback, resp) {
+			this.resourceQuota = resourceQuota || {};
+			this.callback = callback || {};
+			
+			var me = this, 
+				t = new K.SimpleTemplate(),
+				resType = (resourceQuota.type || '').toUpperCase(),
+				type = type2Text[resType],
+				usage = resourceQuota.usage || 0,
+				available = resourceQuota.available || 0,
+				quota = resourceQuota.quota;
+		
+			t._('<img src="/res/css/n/skin-default/images/u/quota-tip.png" />')
+	         ._('<div class="quota-tip">');
+	         	if (resType == 'PRIVATE_MESSAGE_PARTICIPANT') {
+	         		t._('<p>贵公司是免费用户，短邮最多只能添加<span class="strong">', quota ,'</span>个联系人！</p>')
+		            ._('<p>云之家付费用户可以无限制添加！</p>');
+	         	} else if (resType == 'SMS') { 
+	         		t._('<p>贵公司是免费用户，短信最多只能发<span class="strong">', quota ,'</span>条！</p>')
+		            ._('<p>云之家付费用户可以无限制使用短信功能！</p>');
+	         	} else {
+	         		t._('<p>贵公司已创建<span class="strong">', usage ,'</span>个', type ,'！</p>');
+		            t._('<p>必须成为云之家付费用户才能继续使用哦。</p>');
+	         	}
+	        t._('</div>');
+			
+			this.dialog = new K.Dialog({
+				destroyOnClose: true,
+				modal: true,
+				cls: 'resource-quota-exceeded',
+				title: '系统提示',
+				body: t.toString(),
+				buttons: [
+			          { text: '通知管理员', em: true, click: function(obj){ K.ResQuotaTip.prototype._eventNoticeAdmin( obj, type ); } },
+			          { text: '立即购买', em: true, click: function(obj){ K.ResQuotaTip.prototype._eventBuyNow(); } }
+				],
+				onClose: function () {
+					$(document).click();
+					callback && callback.call(me, resp);
+				}
+			});
+			this.dialog.open(true);
+			return this;
+		},
+		
+		_eventNoticeAdmin: function(obj, type) {
+			var me = this, $tg = $(obj).closest('a');
+			
+			K.NoticeAdminQuotaNotEnough($tg, type, function() {
+				$tg.hide();
+				this.callback && this.callback.call(me);
+			});
+		},
+		
+		_eventBuyNow: function() {
+			window.location.href = '/space/c/paid/home';
+		}
+	};
+	
+})(K, jQuery);
+
+
+
+
+
+
+
+
+
+// Tooltip
+K.tooltip = function($elem, extraTop) {
+	$elem.tipsy({fade:true, gravity:'s', extraTop: extraTop ? extraTop : 0});
+};
+
+////////////////////////////////////////////////////////////
+// App:SNS
+////////////////////////////////////////////////////////////
+
+/****************************** Common ******************************/
+/* 命名空间 */
+var S = {$:jQuery, m:{}, c:{}}, F = {$:jQuery};
+
+/* 属性初始化 */
+S.sessionUser = window.__sessionUser;
+S.isCommunity = S.sessionUser && S.sessionUser.networkType === "COMMUNITY";
+S.isTeamUser = S.sessionUser && S.sessionUser.teamUser;
+S.isPublicMail = S.sessionUser && S.sessionUser.isPublicMail;
+S.uploadForbidden = window.__uploadForbidden;
+S.isNonactivatedPage = S.sessionUser && S.sessionUser.isNonactivatedPage;
+
+/* 不允许上传文件时的提示文本 */
+S.uploadForbiddenText = '该网络已屏蔽文件上传功能';
+
+/* 平台URL相关 */
+//XXX 目前平台就是微博，到时需要相应修改。注意，会话超时设置跟S.url()相关，见K.req定义
+S.setCtxPath = function(ctxPath) {
+	this.ctxPath = ctxPath;
+};
+S.setRestPrefix = function(restPrefix) {
+	this.restPrefix = restPrefix;
+};
+S.setSkin = function(tpl, skin) {
+	this.skinPath = this.url('templates/',tpl,'/skin-',skin);
+};
+
+//XXX temp
+S.setPSkin = function(tpl, skin) {
+	this.pSkinPath = this.url('p/templates/',tpl,'/skin-',skin);
+};
+//[END]
+
+S.url = function() {
+	return this.ctxPath + '/' + Array.prototype.join.call(arguments, '');
+};
+S.restUrl = function() {
+	return this.ctxPath + this.restPrefix + '/' + Array.prototype.join.call(arguments, '');
+};
+S.skin = function() {
+	Array.prototype.unshift.call(arguments, this.skinPath + '/');
+	return Array.prototype.join.call(arguments, '');
+};
+
+/**截取字符串.包含中文截取.Fuyx,2011-06-28*/
+S.substring = function(str, maxLen){
+	if(!str){
+		return "";
+	}
+	maxLen = maxLen||0;
+    var newLen = 0, ret = "", zhReg = /[^\x00-\xff]/g, c, addDoc = false;
+    for(var i = 0, len = str.length; i < len; i++){
+        c = str.charAt(i).toString();
+        newLen += c.match(zhReg) ? 2 : 1;
+        if(newLen > maxLen) {
+        	addDoc = true;
+            break;
+        }
+        ret += c;
+    }
+    if(addDoc){
+        ret += "...";
+    }
+    return ret;
+},
+
+//XXX temp
+S.pskin = function() {
+	Array.prototype.unshift.call(arguments, this.pSkinPath + '/');
+	return Array.prototype.join.call(arguments, '');
+};
+//[END]
+
+S.setCtxPath('/microblog'); //XXX 需相应修改
+S.setRestPrefix('/rest');
+S.setSkin('n', 'default');
+
+//XXX temp
+S.setPSkin('n', 'default');
+//[END]
+
+S._urlFn = ['setCtxPath', 'setRestPrefix', 'setSkin', 'url', 'restUrl', 'skin'];
+S._urlFnMixin = function(obj) {
+	var i, len = this._urlFn.length, urlFn;
+	for (i = 0; i < len; i++) {
+		urlFn = this._urlFn[i];
+		obj[urlFn] = this[urlFn];
+	}
+};
+
+
+/* 应用URL相关 */
+var MB = {};
+S._urlFnMixin(MB);
+MB.setCtxPath('/microblog');
+MB.setRestPrefix('/rest');
+MB.setSkin('n', 'default');
+MB.profile = function(userId) {
+	return MB.url(userId + '/profile');
+};
+MB.images = function(imagesName){
+	return MB.skin()+'/images/u/'+imagesName;
+};
+
+S.formatDate = function(date) {
+	var d = new Date(date),
+		year = d.getFullYear(),
+		month = d.getMonth()+1,
+		day = d.getDate();
+	return year + '-' + month + '-' + day;	
+};
+
+/* 用户头像 */
+S.avatar = function(avatarId, size) {
+	size = size || 30;
+	return '/space/c/photo/load?id=' + avatarId + '&spec=' + size;
+};
+
+/* 文件地址 */
+S.file = function(fileId) {
+	// /sns/filesvr/{fileId}
+	return S.url('filesvr/', fileId);
+};
+
+/* ID处理 */
+S.unique = function() {
+	return 'suid' + S.unique.seed++;
+};
+S.unique.seed = 1;
+
+
+/* 程序入口 */
+S.run = function(module) {
+	if (S['m'][module]) {
+		this.$(function(){
+			S['m'][module].prototype._build(S['m'][module]);
+		});
+	} else {
+		if (__debug === true){
+			alert('无法加载模块' + module);
+		}
+	}
+};
+
+/* 提前运行某些组件 */
+S.useCmp = function(cmpName, cmpOptions, parentInstance) {
+	if (S['c'][cmpName]) {
+		S['c'][cmpName].prototype._build(S['c'][cmpName],cmpOptions, parentInstance);
+	} else {
+		if (__debug === true){
+			alert('预加载组件' + cmpName + '失败');
+		}
+	}
+};
+
+
+/****************************** Component ******************************/
+/*==================== Common ====================*/
+/* 消息总线（用于组件之间的通信） */
+S.MQ = {
+	_debug: true,
+	_log: function() {
+		if (this._debug === true) {
+			Array.prototype.unshift.call(arguments, '[SMQ]');
+			__console.info.apply(__console, arguments);
+		}
+	},
+
+	_handlers: {},
+	_topics: function(topics) {
+		return topics.indexOf(',') == -1 ? [topics] : topics.replace(/\s/g, function(){return '';}).split(',');
+	},
+	_topicExists: function(topic) {
+		if (this._handlers.hasOwnProperty(topic) && this._handlers[topic].length != 0) {
+			return true;
+		}
+
+		return false;
+	},
+	_each: function(array, processor) {
+		var len = array.length, item, i;
+		for (i = 0; i < len; i++) {
+			item = array[i];
+			processor(item, i);
+		}
+	},
+
+	pub: function(topic, data) {
+		var me = this, handlers;
+
+		this._log('Publish topics: [' + topic + '], data: ', data);
+		this._log('Handlers: ', this._handlers);
+		
+		this._each(this._topics(topic), function(topic){
+			if (me._topicExists(topic)) {
+				handlers = me._handlers[topic];
+
+				me._each(handlers, function(handler){
+					handler({topic:topic, data:data});
+				});
+			} else {
+				me._log('The topic *' + topic + '* is not subscribed yet');
+			}
+		});
+	},
+	sub: function(topic, handler) {
+		var me = this;
+
+		this._log('Subscribe topics: ' + topic);
+		this._each(this._topics(topic), function(topic){
+			if (me._handlers.hasOwnProperty(topic)) {
+				me._handlers[topic].push(handler);
+			} else {
+				me._handlers[topic] = [handler];
+			}
+		});
+		this._log('Handlers: ', this._handlers);
+	},
+	unsub: function(topic, handler) {
+		var me = this, handlerIndex = -1;
+
+		this._log('Unsubscribe topics: ' + topic);
+		this._each(this._topics(topic), function(topic){
+			if (me._topicExists(topic)) {
+				me._each(me._handlers[topic], function(eachHandler, i){
+					if (eachHandler == handler) {
+						handlerIndex = i;
+					}
+				});
+
+				if (handlerIndex !== -1) {
+					me._handlers[topic].splice(handlerIndex, 1);
+					me._log('Handler found and removed');
+				}
+			} else {
+				me._log('The topic *' + topic + '* doesnot exist, cannot unsubscribed');
+			}
+		});
+		this._log('Handlers: ', this._handlers);
+	},
+	hasSub: function(topic) {
+		return this._topicExists(topic);
+	}
+};
+
+
+/* Data */
+S.Data = {
+	_cache: {},
+	
+	get: function(domain, key) {
+		return this._cache[domain] && this._cache[domain][key];
+	},
+	
+	set: function(domain, key, value) {
+		if (!this._cache[domain]) {
+			this._cache[domain] = {};
+		}
+		this._cache[domain][key] = value;
+	},
+	
+	clear: function(domain) {
+		delete this._cache[domain];
+	}
+};
+
+/*==================== Base Component ====================*/
+S.c.Event = function() {
+	this._propagation = true;
+};
+S.c.Event.prototype = {
+	stopPropagation: function() {
+		this._propagation = false;
+	},
+	isPropagationStopped: function() {
+		return !this._propagation;
+	}
+};
+
+S.c.newInstance = function(constructor, initParams, parentInstance, cmpOptions) {
+	return constructor.prototype._new(constructor, initParams, parentInstance, cmpOptions);
+};
+
+S.c.getInstanceFromRootCls = function(rootCls) {
+	return jQuery(rootCls).data(S.c.Base.prototype.dataVars.INS);
+};
+
+S.c.Base = Class.extend({
+	_debug: false,
+	_log: function() {
+		if (this._debug === true) {
+			Array.prototype.unshift.call(arguments, '[CMP]');
+			__console.info.apply(__console, arguments);
+		}
+	},
+	
+	$: jQuery, // shortcut
+	
+	constr: null, // constructor
+	
+	_parent: null, // parent instance
+	
+	dataVars: {INS:'S_cmpInstance',ROOT:'S_rootElement'},
+	
+	CMP_MARK: 'kcmp',
+	CMP_DISABLED_CLS: 'cmpdisabled',
+	CMP_REQUESTING_CLS: 'cmprequesting',
+	
+	// 组件默认配置项，其中key的命名约束，不使用camel方式而使用连字符方式，如：使用my-title或mytitle，而不能使用myTitle
+	//defaults: {key:value}
+	
+	//[added,finian,110414]
+	_disabledExcludes: [],
+	
+	/* 构造函数 */
+	init: function(params) {
+		var $root;
+		if (params instanceof this.$) {
+			$root = params;
+		} else {
+			if (typeof this.tpl !== 'function') {
+				__console.error('[CMP] this component does not have a *tpl* method');
+				return;
+			}
+			
+			$root = this.$(this.tpl(params));
+		}
+		
+		// 建立DOM元素和JS对象之间的关联
+		this._$elements = {root:$root};
+		$root.data(this.dataVars.INS, this);
+		
+		//是否是EAS Portlet窗体
+		this._isPortlet = this.$(document.body).data('portlet')===true;
+		
+		// Component Event Map
+		this._cmpEventMap = {};
+	},
+	
+	/* 类初始化并产生实例（可能多个），外部调用入口 */
+	_build: function(constructor, cmpOptions, parentInstance) {
+		this.constr = constructor;
+		
+		// 类初始化预处理
+		if (cmpOptions && cmpOptions.pre) {
+			cmpOptions.pre.call(parentInstance, cmpOptions);
+		}
+		
+		var $ = this.$, me = this, instance, $elements, _jsOpts;
+		
+		// 解析类定义
+		this._parse();
+		
+		// 产生实例
+		this._log('building component:', this.rootSelector);
+		$elements = (parentInstance == null) ? $(this.rootSelector) : parentInstance.getRoot$().find(this.rootSelector);
+		
+		$elements.each(function(){
+			var $this = $(this);
+			
+			//[added,finian,110428]
+			// 避免重复初始化
+			if ($this.hasClass(constructor.prototype.CMP_MARK)) {
+				__console.warn('[CMP] component alreay initialized. Component root el:', $this);
+				return;
+			}
+			//[/added]
+			
+			instance = new constructor($this);
+			instance._parent = parentInstance;
+			
+			//[added,finian,110601]
+			// usability
+			if (instance.getRoot$().hasClass(instance.CMP_DISABLED_CLS)) {
+				instance._disabled = true;
+			}
+			
+			// 处理组件的用户配置项options，生成设置项settings
+			instance.settings = {};
+			//// 获取用户配置项options（从js代码中获取）
+			if (cmpOptions && cmpOptions['*']) { // 目前暂时只有应用于类的配置项
+				_jsOpts = cmpOptions['*'];
+			}
+			//// 获取用户配置项options（从dom data属性中获取），优先级最高：instance.getRoot$.data()
+			//// 生成settings
+			$.extend(instance.settings, constructor._defaults, _jsOpts, instance.getRoot$().data());
+			
+			me._log('  its instance:', instance, instance.getRoot$());
+			if (instance.inited) {instance.inited();}
+			
+			// 处理事件初始化
+			me._handleHooks({type:'hooks', instance:instance});
+			// 处理组件事件订阅
+			me._handleCmpEvents(instance);
+			// 处理消息总线消息订阅
+			me._handleSubs(instance);
+			//[added,finian,110430]
+			// 目前该方法用于解决拥有相同基类的组件互相包含时，使用get$()获取dom元素的问题，详见tweet.js
+			instance._beforeChildrenBuild();
+			//[/added]
+			// 处理子组件初始化
+			me._handleCmps(instance);
+			
+			//[added,finian,110428]
+			// 避免重复初始化
+			$this.addClass(constructor.prototype.CMP_MARK);
+			//[/added]
+			if (instance.ready) {instance.ready();}
+		});
+		
+		// 处理代理事件初始化
+		this._handleHooks({type:'dhooks', parentInstance:parentInstance});
+	},
+	
+	// temp
+	_new: function(constructor, initParams, parentInstance, cmpOptions) {
+		
+		// 若组件已经实例化，直接返回
+		if (initParams instanceof this.$ && initParams.data(this.dataVars.INS)) {
+			return initParams.data(this.dataVars.INS);
+		}
+		
+		//if (!this.constr) {
+		//	this.constr = constructor;
+		//}
+		// 之前这种判断是错的，如果父类先初始化，则子类的原型链上也会有constr
+		// 则constr的指向就不正确了
+		this.constr = constructor;
+
+		// 解析类定义
+		this._parse();
+		
+		var _jsOpts,
+			instance = new constructor(initParams); //[!] 之前漏写了var，使instance成为全局变量！应考虑如何避免这种错误
+		
+		//[added,finian,110601]
+		// usability
+		if (instance.getRoot$().hasClass(instance.CMP_DISABLED_CLS)) {
+			instance._disabled = true;
+		}
+		
+		//[added,finian,110428]
+		// 避免重复初始化
+		if (instance.getRoot$().hasClass(constructor.prototype.CMP_MARK)) {
+			__console.warn('[CMP] component alreay initialized. Component root el:', instance.getRoot$());
+			return;
+		}
+		//[/added]
+			
+		instance._parent = parentInstance;
+		
+		// 处理组件的用户配置项options，生成设置项settings
+		instance.settings = {};
+		//// 获取用户配置项options（从js代码中获取）
+		if (cmpOptions && cmpOptions['*']) { // 目前暂时只有应用于类的配置项
+			_jsOpts = cmpOptions['*'];
+		}
+		//// 获取用户配置项options（从dom data属性中获取），优先级最高：instance.getRoot$.data()
+		//// 生成settings
+		$.extend(instance.settings, constructor._defaults, _jsOpts, instance.getRoot$().data());
+		
+		this._log('  its instance:', instance, instance.getRoot$());
+		if (instance.inited) {instance.inited();}
+		
+		// 处理事件初始化
+		this._handleHooks({type:'hooks', instance:instance});
+		// 处理组件事件订阅
+		this._handleCmpEvents(instance);
+		// 处理消息总线消息订阅
+		this._handleSubs(instance);
+		//[added,finian,110430]
+		instance._beforeChildrenBuild();
+		//[/added]
+		// 处理子组件初始化
+		this._handleCmps(instance);
+		
+		//[added,finian,110428]
+		// 避免重复初始化
+		instance.getRoot$().addClass(constructor.prototype.CMP_MARK);
+		//[/added]
+		if (instance.ready) {instance.ready();}
+		
+		// 处理代理事件初始化  [updated,beera,120518]
+		this._handleHooks({type:'dhooks', parentInstance:parentInstance});
+		
+		return instance;
+	},
+	
+	_parse: function() {
+		if (this.constr._parsed !== true) {
+			// parse configurations
+			this._parseCfg();
+			// property getter/setter
+			this._handleProperties();
+			
+			this.constr._parsed = true;
+		}
+	},
+	
+	/* 
+	 * 配置项
+	 * 目前有三类配置项：钩子、子组件、消息总线订阅消息
+	 * [updated,finian,110430,增加组件事件订阅,将defaults改为配置项类型]
+	 * 
+	 * # 钩子配置项 hooks
+	 * 定义了组件使用到的CSS选择器及相关事件类型（事件类型可选），格式如下：
+	 * h_myHook: '.my-css-class|click,hover,*mouseenter'
+	 * 说明：属性以'h_'开头，其值中，事件类型和选择器之间以'|'分隔，之间不能出现其他符号
+	 * 事件类型之间使用','分隔，开头带有'*'的事件表示使用事件代理方式处理（jQuery中使用live方法） 
+	 * 这样定义后，相关的事件处理方法为（当元素的相关事件触发时，就会调用这些方法）：
+	 * _onMyHookClick(e)以及_onMyHookHover(e)
+	 * 注意：【约束】h_root为必需项，定义了组件顶级元素的选择器，选择器必须是类选择器，，如：h_root: '.smsg-panel'
+	 * 
+	 * # 子组件配置项 components
+	 * 定义了该组件内的子组件的类名（不包含命名空间S.c），格式如下：
+	 * c_MessagePanel: 1
+	 * 说明：属性以'c_'开头，其值如果为0，则表示不继承父类的该项配置
+	 * {TODO 组件Options配置}
+	 * 
+	 * # 消息总线订阅消息配置 subscriptions
+	 * 定义了该组件初始化时，需要订阅哪些事件，格式如下：
+	 * s_msgsent: 1
+	 * 说明：属性以's_'开头，后面跟上需要订阅的主题名称（示例中为msgsent），其值如果为0，则表示不继承父类的该项配置
+	 * 这样定义后，相关的消息处理方法为：
+	 * _mqMsgsent(msg)
+	 * 
+	 * [added,finian,110430]
+	 * # 组件事件配置项 component events
+	 * 定义了该组件订阅的组件事件（该事件也可能来自子组件），格式如下：
+	 * e_msgadd: 1
+	 * 说明：属性以'e_'开头，后面跟上需要订阅的事件名称（示例中为msgadd），其值如果为0，则表示不继承父类的该项配置
+	 * 这样定义后，相关的事件处理方法为：
+	 * _eMsgadd(e)
+	 * 
+	 * # 默认选项defaults
+	 * 定义了该组件的默认选项，格式如下：
+	 * d_pageable: true
+	 * 说明：属性以'd_'开头，后跟全小写无分隔变量名
+	 * 
+	 * # 属性getter/setter
+	 * 定义需自动生成getter/setter的属性，格式如下：
+	 * p_name: 1
+	 * 说明：属性以'p_'开头，其值如果为0，则表示不继承父类的该项配置
+	 * 如果类中已存在同名方法，则不自动生成。默认生成getter/setter如下：
+	 * getName: function() {
+	 *     return this._name;
+	 * };
+	 * setName: function(name) {
+	 *     this._name = name;
+	 * }
+	 * [/added]
+	 * 
+	 * 
+	 * 配置项经过解析后（_parseCfg方法），将在类构造函数产生以下属性：
+	 * Xxx._hooks: {myHook: ['.my-css-class', 'click', 'hover']}
+	 * Xxx._dhooks: {myHook: ['.my-css-class', 'click']} // 需要进行代理事件处理的钩子
+	 * {TODO 事件代理待处理问题：如果一个类被初始化多次，即调用Xxx.prototype._build方法多次，则live的事件处理有多个}
+	 * Xxx._cmps: {MessagePanel:null, Paginator:{all:{...}}}
+	 * Xxx._subs: ['msgsent', 'abc']
+	 * Xxx._cmpevents: ['abc', 'def']
+	 * Xxx._defaults: {}
+	 * Xxx._properties: ['name']
+	 * 
+	 * 并产生一个rootSelector属性（原型链上）
+	 * 
+	 * 注意，不能将配置项解析结果放在以下形式定义的属性中，否则子类的相关配置项将不正确（继承了来自父类的相关配置项），
+	 * 因为这些属性只在顶级原型链中保留一份，除非子类显示重新定义这些属性 。解决办法是将解析结果放到类构造器中
+	 * _hooks: {},
+	 * _cmps: [],
+	 * _subs: [],
+	 */
+	_parseCfg: function() {
+		var constructor = this.constr, prefix, prop;
+		
+		constructor._hooks = {};
+		constructor._dhooks = {};
+		constructor._cmps = {};
+		constructor._subs = [];
+		constructor._cmpevents = [];
+		constructor._defaults = {};
+		constructor._properties = [];
+		
+		for (prop in this) {
+			prefix = prop.substring(0, 2);
+			if (this._cfgParser[prefix]) {
+				this._cfgParser[prefix](this, constructor, prop.substring(2), this[prop]);
+			}
+		}
+		
+		this.rootSelector = constructor._hooks.root[0];
+	},
+	_cfgParser: {
+		h_: function(scope, constr, item, value) {
+			if (value != '') {
+				var tmps = value.split('|'), selector = tmps[0];
+				constr._hooks[item] = [selector];
+				
+				if (tmps[1]) {
+					var eventTypes = tmps[1].split(','), i, len = eventTypes.length, eventType, dhook;
+					for (i = 0; i < len; i++) {
+						eventType = eventTypes[i];
+						if (scope.$.trim(eventType) == '') {
+							scope._log('[WARN] error format in hooks defininition: ', value);
+							continue;
+						}
+						
+						if (eventType.substring(0, 1) == '*') { // 需要进行代理事件处理的钩子
+							eventType = eventType.substring(1);
+							dhook = constr._dhooks[item];
+							if (dhook) {
+								dhook.push(eventType);
+							} else {
+								constr._dhooks[item] = [selector, eventType];
+							}
+						} else {
+							constr._hooks[item].push(eventType);
+						}
+					}
+				}
+			}
+		},
+
+		c_: function(scope, constr, item, value) {
+			if (value != 0) {
+				constr._cmps[item] = (typeof value === 'object') ? value : null;
+			}
+		},
+
+		s_: function(scope, constr, item, value) {
+			if (value != 0) {
+				constr._subs.push(item);
+			}
+		},
+		
+		e_: function(scope, constr, item, value) {
+			if (value != 0) {
+				constr._cmpevents.push(item);
+			}
+		},
+		
+		d_: function(scope, constr, item, value) {
+			constr._defaults[item] = value;
+		},
+		
+		p_: function(scope, constr, item, value) {
+			if (value != 0) {
+				constr._properties.push(item);
+			}
+		}
+	},
+	
+	_handleHooks: function(cfg) {
+		// cfg.type: hooks|dhooks
+		
+		var constructor = this.constr, hooks = constructor['_' + cfg.type], methodName, defines, numDefines, selector,
+			me = this,
+			$ = this.$,
+			$element, jMethod,
+			i, eventType,
+			instance = cfg.instance, instanceMethod, handlerName,
+			delegatedSelector,
+			delegateIdentify;
+		
+		this._log('  handle', cfg.type, hooks);
+		
+		for (methodName in hooks) {
+			defines = hooks[methodName];
+			numDefines = defines.length;
+			
+			if (numDefines > 1) {
+				selector = defines[0];
+				
+				if (cfg.type == 'hooks') {
+					$element = (methodName == 'root') ? instance.getRoot$() : instance.getRoot$().find(selector);
+				} else { // dhooks
+					//[updated,finian,110519]
+					// 将live换成delegate
+					if (cfg.parentInstance == null) {
+						$element = $('body');
+					} else {
+						$element = cfg.parentInstance.getRoot$();
+					}
+				}
+				
+				for (i = 0; i < numDefines; i++) {
+					if (i == 0) {
+						continue;
+					}
+					eventType = defines[i];
+					instanceMethod = '_on' + K.ucfirst(methodName) + K.ucfirst(eventType);
+					if (cfg.type == 'hooks') {
+						$element.bind(eventType, {instance:instance, instanceMethod:instanceMethod, instanceProto:this}, this._eventHandler);
+					} else { // dhooks
+						
+						// 注意dhooks情况下传过来的cfg中没有instance，只有parentInstance
+						//[updated,finian,110615]
+						// 需考虑hook是root的情况
+						//[updated,finian,120929]
+						// 这里少考虑了一种情况：$(this.rootSelector)和$element是同一个元素，
+						// 这种情况只会在this.rootSelector = 'body'下产生，即当组件是模块(S.m.XXX)时产生。
+						// 实例：微名片功能是定义在模块下的，最终会产生以下事件处理语句：
+						// $('body').delegate('body a.namecard', 'mouseenter', ...);
+						// 该语句在1.7下生效，但在1.8下无效，所以未升级到1.8时发现不了该问题（看源码后再具体分析产生原因）
+						// [todo]
+						// 1.7开始建议使用.on代替.bind/.live/.delegate方法
+						if ( this.rootSelector === 'body' ) { // 表明是模块
+							delegatedSelector = selector;
+						} else if (selector == this.rootSelector) {
+							delegatedSelector = this.rootSelector;
+						} else {
+							delegatedSelector = this.rootSelector + ' ' + selector;
+						}
+						// 在委托的父元素上记录绑定的事件，以防止重复绑定 [updated,beera,120518]
+						delegateIdentify = escape(delegatedSelector + eventType);
+						if(!$element.data(delegateIdentify)){
+							$element.delegate(delegatedSelector, eventType, {instance:instance, instanceMethod:instanceMethod, instanceProto:this}, this._dEventHandler);
+							$element.data(delegateIdentify, true);
+						}
+					}
+				}
+			}
+		}
+	},
+	_handleCmps: function(parentInstance) {
+		var cmps = this.constr._cmps, cmp;
+		
+		for (cmp in cmps) {
+			if (typeof S.c[cmp] === 'undefined') {
+				__console.error('[CMP] component', cmp, 'not found');
+			} else {
+				S.c[cmp].prototype._build(S.c[cmp], cmps[cmp], parentInstance);
+			}
+		}
+	},
+	_handleSubs: function(instance) {
+		var topics = this.constr._subs, i, numTopics = topics.length, topic, handlerMethodName;
+		this._log('handle subscriptions', topics);
+		for (i = 0; i < numTopics; i++) {
+			topic = topics[i];
+			handlerMethodName = '_mq' + K.ucfirst(topic);
+			if (typeof instance[handlerMethodName] !== 'function') {
+				__console.error('MQ handler *' + handlerMethodName + '* not found in', instance);
+			} else {
+				instance.sub(topic, handlerMethodName);
+			}
+		}
+	},
+	_handleCmpEvents: function(instance) {
+		var eventTypes = this.constr._cmpevents, i, numEventTypes = eventTypes.length, eventType, handlerMethodName;
+		this._log('handle component event subscriptions', eventTypes);
+		for (i = 0; i < numEventTypes; i++) {
+			eventType = eventTypes[i];
+			handlerMethodName = '_e' + K.ucfirst(eventType);
+			if (typeof instance[handlerMethodName] !== 'function') {
+				__console.error('component event handler *' + handlerMethodName + '* not found in', instance);
+			} else {
+				instance.register(eventType, handlerMethodName);
+			}
+		}
+	},
+	_handleProperties: function() {
+		var noop = __noop, me = this, propertyNames = this.constr._properties, i, num = propertyNames.length, 
+			propertyName, ucfirstPropertyName, getterName, setterName, applyName;
+		
+		for (i = 0; i < num; i++) {
+			propertyName = propertyNames[i];
+			ucfirstPropertyName = K.ucfirst(propertyName);
+			getterName = 'get' + ucfirstPropertyName;
+			setterName = 'set' + ucfirstPropertyName;
+			applyName = 'apply' + ucfirstPropertyName;
+
+			// 注意：不能使用prototype的hasOwnProperty来判断是否有相应的方法，
+			// 因类的有些方法是继承于父类的原型链的，这些方法如果使用hasOwnProperty来
+			// 判断则结果为false
+			if (!this.constr.prototype[applyName]) {
+				this.constr.prototype[applyName] = noop;
+			}
+			
+			if (!this.constr.prototype[getterName]) {
+				// 解决循环闭包问题
+				(function(propertyName){
+					me.constr.prototype[getterName] = function() {
+						return this['_' + propertyName];
+					};
+				})(propertyName);
+			}
+			if (!this.constr.prototype[setterName]) {
+				(function(propertyName, applyName){
+					me.constr.prototype[setterName] = function(value) {
+						this['_' + propertyName] = value;
+						this[applyName](value);
+					};
+				})(propertyName, applyName);
+			}
+		}
+	},
+	
+	_eventHandler: function(e) {
+		if (this.nodeName.toLowerCase() == 'a' && e._default !== true) {
+			e.preventDefault();
+		}
+		
+		var instance = e.data.instance, instanceMethod = e.data.instanceMethod;
+		
+		//[added,finian,110414]
+		if (instance.isDisabled() && instance._disabledExcludes != '*' && instance.$.inArray(e.type, instance._disabledExcludes) == -1) {return false;}
+		//[/added]
+		
+		if (typeof instance[instanceMethod] === 'function') {
+			instance[instanceMethod](e);
+			
+			// 如果e._propagation === true，则冒泡。默认不冒泡。
+			if (e._propagation !== true) {
+				e.stopPropagation();
+			}
+		} else {
+			__console.error('Cannot find method *' + instanceMethod + '*');
+			return false;
+		}
+	},
+	
+	// delegated event handler
+	_dEventHandler: function(e) {
+		if (this.nodeName.toLowerCase() == 'a' && e._default !== true) {
+			e.preventDefault();
+		}
+		
+		var $this = $(this), instanceMethod = e.data.instanceMethod,
+			instanceProto = e.data.instanceProto, rootSelector = instanceProto.rootSelector, rootCssClass = rootSelector.substring(1),
+			instance, $rootElem;
+		
+		// 获取组件实例
+		// 【约束】根元素的选择器必须是类选择器
+		if ($this.hasClass(rootCssClass)) { // 该元素是根元素
+			$rootElem = $this;
+		} else {
+			$rootElem = $this.data(instanceProto.dataVars.ROOT);
+			if (!$rootElem) {
+				// 查找根元素
+				$rootElem = $this.closest(rootSelector);
+				$this.data(instanceProto.dataVars.ROOT, $rootElem);
+			}
+		}
+		instance = $rootElem.data(instanceProto.dataVars.INS);
+		
+		//[added,finian,110414]
+		if (instance.isDisabled() && instance._disabledExcludes != '*' && !instance.$.inArray(e.type, instance._disabledExcludes)) {return false;}
+		//[/added]
+		
+		if (typeof instance[instanceMethod] === 'function') {
+			instance[instanceMethod](e);
+			
+			// 如果e._propagation === true，则冒泡。默认不冒泡。
+			if (e._propagation !== true) {
+				e.stopPropagation();
+			}
+		} else {
+			__console.error('Cannot find method *' + instanceMethod + '*');
+			return false;
+		}
+	},
+	
+	/* 通过消息总线发布消息 */
+	pub: function(topic, data) {
+		S.MQ.pub(topic, data);
+	},
+	
+	/* 通过消息总线订阅消息 */
+	sub: function(topic, handlerName) {
+		S.MQ.sub(topic, this.$.proxy(this, handlerName));
+	},
+	
+	_getSelector: function(selectorName) {
+		return this.constr._hooks[selectorName] ? this.constr._hooks[selectorName][0] : selectorName;
+	},
+	/* 
+	 * 获取元素（jQuery对象）
+	 * 参数selectorName可以是在“钩子配置项” 中定义的变量名，如：buttons（对应钩子配置项则为：h_buttons）
+	 * 也可以是CSS选择器，如：'.btn'
+	 * [updated110621] 增加参数cache，指定是否从缓存获取数据，默认为true
+	 */
+	get$: function(selectorName, cache) {
+		var selector = this._getSelector(selectorName);
+		if (!this._$elements.hasOwnProperty(selector) || cache === false) {
+			__console.info('searching elements which selector is', selector);
+			this._$elements[selector] = this._$elements['root'].find(selector);
+		}
+		
+		return this._$elements[selector];
+	},
+	
+	getRoot$: function() {
+		return this._$elements.root;
+	},
+	
+	getId: function() {
+		return this.getRoot$().attr('id');
+	},
+
+	
+	getSettings: function() {
+		return this.settings;
+	},
+	
+	/* 获取父组件 */
+	getParent: function() {
+		return this._parent;
+	},
+	
+	/* 获取子组件 */
+	getChild: function(className) {
+		return this.getChildren(className)[0];
+	},
+	getChildren: function(className) {
+		var $ = this.$, me = this, instances = [];
+		
+		if (!S.c[className]) {
+			__console.error('[CMP]cannot find component *' + className + '*, pls check the component name');
+			return instances;
+		}
+		
+		var $elements = this.get$(S.c[className].prototype.rootSelector);
+		if ($elements.length == 0) {
+			__console.error('[CMP]child component *' + className + '* not found');
+			return instances;
+		}
+		
+		$elements.each(function() {
+			instances.push($(this).data(me.dataVars.INS));
+		});
+		
+		return instances;
+	},
+	getChildById: function(id) {
+		var $elements = this.get$('#' + id);
+		if ($elements.length == 0) {
+			__console.error('[CMP]child component with id *' + id + '* not found');
+			return null;
+		}
+		return $elements.data(this.dataVars.INS);
+	},
+	getCmpById: function(id) {
+		var $elements = this.$('#' + id);
+		if ($elements.length == 0) {
+			__console.error('[CMP]component with id *' + id + '* not found');
+			return null;
+		}
+		return $elements.data(this.dataVars.INS);
+	},
+	hasChild: function(className) {
+		return this['c_' + className] == 1 && this.getChild(className);
+	},
+	definedChild: function(className) {
+		return this['c_' + className] == 1;
+	},
+	
+	// 动态创建子组件实例
+	//[added,finian,110611]
+	buildChild: function(className, cmpOptions) {
+		if(!S.c[className]){
+			__console.error('[CMP]cannot find component *' + className + '*, pls check the component name');
+			return null;
+		}
+		S.c[className].prototype._build(S.c[className], cmpOptions, this);
+	},
+	
+	_disabled: false,
+	enable: function() {
+		this._disabled = false;
+		this.getRoot$().removeClass(this.CMP_DISABLED_CLS);
+	},
+	disable: function() {
+		this._disabled = true;
+		// IE6的一个怪异bug：动态给一个元素添加名称为disabled的类后，元素的样式会受到影响
+		// 但系统中未定义disabled的CSS样式，难道是一个内置的CSS？
+		// 这里使用cmpdisabled来解决此问题
+		//[updated110530] 这是由于IE6不支持multiple classes引起的，p.css中有一处定义如下：
+		// .btn.disabled {color:#fff...}
+		// IE6会解析成 .disabled {color:#fff...}，所以对使用disabled类的元素样式产生了影响
+		// 这里还是继续使用cmpdisabled代替disabled，以表示它和组件状态相关
+		this.getRoot$().addClass(this.CMP_DISABLED_CLS);
+	},
+	isDisabled: function() {
+		return this._disabled;
+	},
+	
+	_requesting: false,
+	requesting: function() {
+		this._requesting = true;
+		this.getRoot$().addClass(this.CMP_REQUESTING_CLS);
+		this.disable();
+	},
+	requested: function() {
+		this._requesting = false;
+		this.getRoot$().removeClass(this.CMP_REQUESTING_CLS);
+		this.enable();
+	},
+	isRequesting: function() {
+		return this._requesting;
+	},
+	
+	//[added,finian,110430]
+	// Component Events
+	register: function(eventType, handlerMethodName) {
+		if (!this._cmpEventMap[eventType]) {
+			this._cmpEventMap[eventType] = {};
+		}
+		
+		this._cmpEventMap[eventType][handlerMethodName] = 1;
+	},
+	
+	unregister: function(eventType, handlerMethodName) {
+		if (this._cmpEventMap[eventType]) {
+			delete this._cmpEventMap[eventType][handlerMethodName];
+		}
+	},
+	
+	fire: function() {
+		var event = new S.c.Event(), eventType = arguments[0], i, len = arguments.length, arg;
+		event._fireData = [event];
+		for (i = 1; i < len; i++) {
+			arg = arguments[i];
+			event._fireData.push(arg);
+		}
+		this._fire(eventType, event);
+	},
+	
+	_fire: function(eventType, event) {
+		var handlers = this._cmpEventMap[eventType], retValue;
+		if (handlers) {
+			for (var handlerMethodName in handlers) {
+				retValue = this[handlerMethodName].apply(this, event._fireData);
+			}
+		}
+		
+		// propagation
+		if (this.getParent() && retValue !== false && !event.isPropagationStopped()) {
+			this.getParent()._fire(eventType, event);
+		}
+	},
+	//[/added]
+	
+	_beforeChildrenBuild: __noop
+});
+
+
+/*==================== Base Module ====================*/
+/* 假定：模块不能包含模块（即模块没有子模块的概念） */
+S.m.Base = S.c.Base.extend({
+	// 设置为'.page'的问题是：某些dom可能会被提到.page外面（如使用colorbox时），导致该dom无法通过get$方法获取得到
+	h_root: 'body'
+});
+
+
+
+/* Helpers */
+S.BtnHelper = {
+	_firstChild: function(el) {
+		return el && el.children && el.children[0];
+	},
+	
+	text: function($btn, text) {
+		if (typeof text === 'undefined') {
+			return this._firstChild($btn[0]).innerHTML;
+		} else {
+			this._firstChild($btn[0]).innerHTML = text;
+		}
+	},
+	
+	enable: function($btn) {
+		$btn.removeClass('disabled');
+	},
+	
+	disable: function($btn) {
+		$btn.addClass('disabled');
+	},
+	
+	isDisabled: function() {
+		return $btn.hasClass('disabled');
+	}
+};
+
+
+/* 清空所有微名片数据缓存。微名片逻辑见default.js */
+S.clearNamecardData = function() {
+	var data = $(document).data();
+	for (key in data) {
+		if (key.substring(0, 8) == 'namecard') {
+			data[key] = null;
+		}
+	}
+};

@@ -1,0 +1,242 @@
+// requirejs.config({
+// 	'baseUrl': '/home/Common/js/',
+// 	'paths': {
+// 		'jqueryOld': 'jquery-1.7.1',
+// 		'core': 'core',
+// 		'homeRigister': 'home',
+// 		'source': '/home/Common/js/source.js?201606151739'
+
+// 	},
+// 	'shim': {
+// 		'homeRigister': {
+// 			deps : ["core", "source"]
+// 		},
+// 		'core': {
+// 			deps : ["jqueryOld"]
+// 		}
+// 	},
+// 	urlArgs: '201605101123'
+// });
+define(['jquery', 'core', 'homeRigister'],
+	function(jQuery, S, home) {
+
+	});
+
+// 登陆注册
+var wpLogin = (function() {
+
+	var $body = $('body'),
+		$header = $('.header'),
+		navFlag = true,
+		$headLogin = $('#headLogin'),
+		bannerHeight = $('#homeBanner').height() || $('.page-banner').height(),
+		navHeight = $('.header-nav').height(),
+		lastPosition = 0;
+
+	var searchObj;
+
+	function getParaFromUrl(key) {
+		var search = location.search,
+			searchStr, searchArr, item, itemArr;
+
+		if (!searchObj) {
+			searchObj = {};
+			searchStr = search.slice(1);
+			searchArr = searchStr.split('&');
+			for (var i = 0, len = searchArr.length; i < len; i++) {
+				item = searchArr[i];
+				itemArr = item.split('=');
+				searchObj[itemArr[0]] = itemArr[1];
+			}
+		}
+
+		if (!searchObj[key]) {
+			return '';
+		}
+		return searchObj[key];
+	}
+
+	function init() {
+		login();
+
+		mbInit();
+
+		$(window).scroll(function() {
+			navHide();
+		});
+
+		if( isMobile() ){
+			$(".bottom-banner").show();
+		}
+
+		if(isWeixin()){
+			var currUrl = encodeURIComponent(window.location.href)
+			var urla = getUrlParam('a')　|| '';
+			var title = '', description = '';
+			switch (urla) {
+				case 'products':
+					title = '云之家产品介绍'
+					description = '赋能个体，激活组织，提供优秀的移动办公服务，改变亿万人的工作方式'
+					break;
+				case 'caseList':
+					title = '云之家客户案例'
+					description = '大中型企业移动办公首选品牌。万科、海尔、华润、华大基因等领军企业都在用'
+					break;
+				default:
+					title = '云之家介绍'
+					description = '赋能个体，激活组织，大中型企业移动办公首选品牌。万科、海尔、华润、华大基因等领军企业都在用'
+					break;
+			}
+			$.ajax({
+				url: '/invite/c/wechat/jssdk?url=' + currUrl,
+				type: 'post',
+				data: {},
+				success: function (res){
+					var dataInfo = res
+					if (dataInfo.success) {
+						// 微信分享
+						wx.config({
+							debug: false, // true开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+							appId: dataInfo.data.appId, // 必填，公众号的唯一标识     
+							timestamp: dataInfo.data.timestamp, // 必填，生成签名的时间戳
+							nonceStr: dataInfo.data.nonceStr, // 必填，生成签名的随机串
+							signature: dataInfo.data.signature, // 必填，签名，见附录1
+							jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+						});
+
+						var shareLogo = 'https://static.yunzhijia.com/microblog/filesvr/5a27b79b364a0f1418dc2b5c?original';
+						var currUrl = window.location.href;
+
+						wx.ready(function () {
+							// 分享给朋友
+							wx.onMenuShareAppMessage({
+								title: title, // 标题
+								desc: description, // 描述
+								link: currUrl, // 链接
+								imgUrl: shareLogo, // 分享的图标
+								fail: function (res) {
+									alert(JSON.stringify(res));
+								}
+							});
+
+							// 分享到朋友圈
+							wx.onMenuShareTimeline({
+								title: title, // 标题
+								link: currUrl, // 链接
+								imgUrl: shareLogo, // 分享的图标
+								fail: function (res) {
+									alert(JSON.stringify(res));
+								}
+							});
+						})
+					}
+				}
+			})
+		}
+	}
+
+	//判断是否移动端
+
+    function isMobile() {
+      var os = getOS();
+
+      return os == 'ios' || os == 'android';
+    };
+
+    function getOS() { //获取操作系统平台，IOS或安卓
+      return (navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/) ? 'ios' : navigator.userAgent.match(/Android/i) ? 'android' : '');
+    };
+		
+		// 导航条隐藏
+		function navHide() {
+			var nowPosition = $(document).scrollTop(),
+				offsetHeight = nowPosition - lastPosition;
+			// console.log(nowPosition, lastPosition, bannerHeight, navHeight)
+			if (lastPosition < (bannerHeight + navHeight) ||
+				lastPosition >= (bannerHeight + navHeight) && offsetHeight < 0) {
+				// 显示
+				if (!navFlag) {
+					$header.removeClass('hideHeader');
+					navFlag = true;
+				}
+			} else {
+				// 隐藏
+				if (navFlag) {
+					$header.addClass('hideHeader');
+					navFlag = false;
+				}
+			}
+			lastPosition = nowPosition;
+		}
+
+		function login() {
+			var utm_source = getParaFromUrl('utm_source'),
+			utm_medium = getParaFromUrl('utm_medium');
+			$headLogin.on('click', 'a', function() {
+				var $this = $(this);
+
+				if ($this.hasClass('headLogin')) {
+					return;
+					var d = dialog({
+						skin: 'dialog-user',
+						title: '登陆',
+						content: haedLogin,
+						quickClose: true
+					}).showModal();
+
+				} else if ($this.hasClass('headSignUp')) {
+					if(isMobile()){
+						window.location.href = '/invite/c/pre-phoneRegister?_t=' + (new Date()).getTime() + 
+						'&regSource=' + utm_medium +
+						'&regSourceType=' + utm_source;
+					}else{
+						/*
+						if($('.ui-popup-modal #headSignUp').length===0){
+						// 此时注册框还没打开
+							var d = dialog({
+								skin: 'dialog-user',
+								title: '注册',
+								content: headSignUp,
+								quickClose: true
+							}).showModal();
+						}
+						*/
+						window.location.href = '/space/c/user-activate/registerUserByMobile?_t=' + (new Date()).getTime() +
+						'&regSource=' + utm_medium +
+						'&regSourceType=' + utm_source;
+					}
+				}
+			});
+		}
+
+	// 移动端
+
+	function mbInit() {
+		headMenu();
+	}
+
+	function headMenu() {
+		var $menuContainer = $('div.header-menu');
+		$('div.header-hamburger').on('click', function() {
+			$menuContainer.slideToggle();
+		})
+	}
+
+	return {
+		init: init
+	}
+	
+	function getUrlParam(name) {//获取url中的参数
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+    var r = window.location.search.substr(1).match(reg); //匹配目标参数
+    if (r != null){
+        return decodeURIComponent(r[2]);
+    }
+    return null; //返回参数值
+  }
+	// 判断是否在微信
+	function isWeixin () {
+		var ua = window.navigator.userAgent.toLowerCase();
+		return ua.match(/MicroMessenger/i) == 'micromessenger'
+	}
+}());

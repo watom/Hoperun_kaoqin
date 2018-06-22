@@ -1,0 +1,61 @@
+body{ font-family:Arial; font-size:12px;background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/login_bg.gif) repeat-x center top #90d7f7; padding: 0; margin: 0;}
+td{	font-size: 12px;}
+
+.buttonstyle{ width: 77px; height: 28px; margin: 0 10px 0 0; padding: 2px 4px 0 4px; border: none; font-size: 14px; color:#ffffff; font-weight:bold; background-image: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/login_btn.gif);}
+.ainput{width: 209px;height: 27px;border-color: #cdcdcd;}
+
+.aBtn_ch{height: 21px;width: 70px;float: right;background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/language_ch.png) no-repeat 0px -18px;text-align: center;line-height: 22px;color: White;font-weight: bolder;cursor: pointer;}
+.aBtn_en{height: 21px;width: 70px;float: right;background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/language_en.png) no-repeat 0px -18px;text-align: center;line-height: 22px;color: White;font-weight: bolder;cursor: pointer;}
+
+.login_bg{ padding-left: 60px;height:32px;position:absolute;top:20px;}
+.login_bg span{ color: #004ea2; font-family: Microsoft YaHei; float: left;}
+.login_bg .span01{ font-size: 20px;font-weight: bold;margin-top: 10px;margin-left: 5px;}
+.login_bg .span02{ font-size: 16px;margin-top: 15px; margin-left: 8px;}
+.language_mod{ height: 20px; padding-right: 50px; margin-top: -2px;}
+
+.middle_tb td a{ color:#004ea2; text-decoration: none;}
+.middle_tb td a:hover{ text-decoration: underline;}
+
+.leftname{ float: left;}
+
+.copyright{ color: #8b8b8b; margin-top: 180px; font-family: Arial; text-align: center;}
+
+.logbody_bg{ background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/bg_pic.jpg) no-repeat; margin: 0 auto; position: relative; left: 48px; top: 132px; height: 370px; width: 616px; }
+.logbody{ background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/login_kuang.png) no-repeat; height: 246px; position: absolute; top: 110px; left: 20px; width: 481px; text-align: left;}
+
+.denglu{ color: #004ea2; font-weight: bold; font-family: Microsoft YaHei; font-size: 18px; padding-left: 33px; padding-top: 18px;}
+.middle_tb{ margin: 0 auto; margin-top: 20px;}
+
+.loginput{ float: left; margin-left: 5px;}
+.loginput .picle{ background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/loginput_bg.gif) no-repeat 0px 0px; height: 25px; width: 6px; float: left;}
+.loginput .picce{ background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/loginput_bg.gif) repeat-x 0px -27px; height: 25px; float: left;}
+.loginput .picce input{ border: 0px; background-color: transparent; height: 22px; line-height:22px;}
+.loginput .picri{ background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/loginput_bg.gif) no-repeat 0px -54px; height: 25px; width: 6px; float:left;}
+
+.gba{ margin-top: 5px; margin-left: -8px;}
+
+.lang-left-on{ background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/language_bg.png) no-repeat 0px 0px; height: 19px; width: 13px; float: left;}
+.lang-left-off{ background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/language_bg.png) no-repeat 0px -126px; height: 19px; width: 13px; float: left;}
+.lang-right-on{ background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/language_bg.png) no-repeat 0px -63px; height: 19px; width: 13px; float: left;}
+.lang-right-off{ background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/language_bg.png) no-repeat 0px -105px; height: 19px; width: 13px; float: left;}
+.lang-on { background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/language_bg.png) repeat-x 0px -21px ; color: #fff; height: 19px; line-height: 19px; padding-left: 13px; padding-right: 13px;float: left;cursor:pointer;}
+.lang-off{ background: url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/language_bg.png) repeat-x 0px -147px ; color: #fff; height: 19px; line-height: 19px; padding-left: 13px; padding-right: 13px; float: left;cursor:pointer;}
+
+.kylogo{float: left;width:180px;height:76px;background:url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/kylogo.gif) no-repeat;}
+.fgtpwdt{position:relative;left:105px;top:-50px;font-size:26px;font-style:italic;color:#3864bb;}
+.fgtpwd_bg{background:url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/fgtpwd.png);}
+
+
+/*两个背景logo*/
+.logo{float:left;width:360px; height:67px;display:inline; background :url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Logo/logo.png) no-repeat;}/*修改logo图片*/
+.userinfo{float:right; text-align:right;width:auto; vertical-align:bottom;height:20px; padding:0 6px 0 0;position:absolute;right:0px; top:96px;}/*增加margin-top:96px;去掉height属性*/
+/*.kylogo{float: left;width:180px;height:76px;background:url(../Skin/Images/Logo/kylogo.gif)}*/
+
+.hrheader .header{height:116px;background-image:url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/portal_bg.gif);background-repeat:repeat-x;}/*50更改height:116 修改背景图片*/
+.clogot{color:#002d59; float:left;height:50px;display:inline;width:auto;height:50;font-size:42px;font-weight:bolder;line-height:50px;font-family:"宋体";position:absolute;top: 30px;left:35%;}
+/*Agreement*/
+.agreebody{ background:url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/bgpic.jpg) repeat; margin:0 2px;}
+.whiteheader{ background-color:#fff;}
+/*新添加样式*/
+.xytext{ border:1px solid #b0b0b0; background:url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/Portal/inputbg.png) repeat-x scroll 0 -21px #FFFFFF; height:385px; margin-top:18px; font-family:Microsoft YaHei; font-size:16px; font-weight:bold; line-height:30px; padding:10px 5px 5px 10px; width:80%;}
+.xyinput{ background:url(http://ehr.hoperun.com:8018/HRIS/Skin/Images/xyinput_bg.png) no-repeat; border:none; height:23px; line-height:23px; width:52px;}

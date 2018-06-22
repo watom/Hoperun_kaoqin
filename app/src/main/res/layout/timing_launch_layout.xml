@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <com.watom999.www.hoperun.ETitleBar
+        android:id="@+id/titlebar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        style="@style/eleApply_secNav_text_style"
+        android:text="钉钉启动时间设置"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        style="@style/eleApply_item_style"
+        android:orientation="horizontal">
+
+        <TextView
+            style="@style/eleApply_blackText_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="启动时间" />
+
+        <TextView
+            android:id="@+id/launch_time"
+            style="@style/eleApply_edittext_style"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="--" />
+    </LinearLayout>
+</LinearLayout>

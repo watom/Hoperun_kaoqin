@@ -1,9 +1,13 @@
 package com.watom999.www.hoperun.activity;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,6 +22,8 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -51,6 +57,7 @@ public class MainActivity extends AppCompatActivity
     private Toast myToast;
     private UserInfoEntity userInfoEntity;
     private long insert;
+    private PackageManager packageManager;
 
     private Handler handler = new Handler() {
         @Override
@@ -254,24 +261,79 @@ public class MainActivity extends AppCompatActivity
 //            initWebView("file:///android_asset/263企业邮箱-登录入口.htm");
             page_type = "2";
         } else if (id == R.id.nav_slideshow) {
-            initWebView("https://www.yunzhijia.com/home/?m=open&a=login");
-            fab.hide();
+//            initWebView("https://www.yunzhijia.com/home/?m=open&a=login");
 //            initWebView("file:///android_asset/金蝶云之家帐号在线登录-云之家官网.htm");
+            openLocalApp("com.kdweibo.client", "云之家");  //打开钉钉
             page_type = "3";
-        } else if (id == R.id.nav_manage) {
-
         } else if (id == R.id.nav_bigevent) {
-            startActivity(new Intent(this, LearnMaterialsQuery.class));
+            openLocalApp("com.alibaba.android.rimet", "钉钉");  //打开钉钉
+        } else if (id == R.id.nav_manage) {
+            startActivity(new Intent(this, TimingLaunchActivity.class));
         } else if (id == R.id.nav_share) {
             startActivity(new Intent(this, ShareAppActivity.class));
-
         } else if (id == R.id.nav_relate) {
-
+            startActivity(new Intent(this, AboutUSActivity.class));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void openLocalApp(String packageName, String appName) {
+        packageManager = getPackageManager();
+        if (checkPackInfo(packageName)) {//检查是否有要打开的app
+            Intent intent = packageManager.getLaunchIntentForPackage(packageName);
+            if (packageName.equals("com.alibaba.android.rimet")) {
+                //打开钉钉考勤界面
+            }
+            startActivity(intent);
+        } else {
+            MyToast.showToast(this, "手机未安装" + appName + "软件，正前往手机市场...");
+            launchAppMarket(packageName, appName);//跳转到应用市场
+        }
+    }
+
+    private void launchAppMarket(String packageName, String appName) {
+        String model = Build.MODEL;
+        String appmarket = null;
+        if (model.contains("huawei")) {
+            appmarket = "com.huawei.appmarket";
+        } else if (model.contains("xiaomi")) {
+            appmarket = "com.xiaomi.market";
+        } else {
+            MyToast.showToast(this, "请在应用市场上下载" + appName);
+            return;
+        }
+        try {
+            if (TextUtils.isEmpty(packageName)) return;
+
+            Uri uri = Uri.parse("market://details?id=" + packageName);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            if (!TextUtils.isEmpty(appmarket)) {
+                intent.setPackage(appmarket);
+            }
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 检查包是否存在。
+     *
+     * @param packageName
+     * @return
+     */
+    private boolean checkPackInfo(String packageName) {
+        PackageInfo packageInfo = null;
+        try {
+            packageInfo = getPackageManager().getPackageInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return packageInfo != null;
     }
 
     @Override
@@ -450,4 +512,17 @@ public class MainActivity extends AppCompatActivity
         return userLoginInfo;
     }
 
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+//        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {}
+            String currentUrl = webView01.getUrl();
+            Boolean equalStr = !isEqualStr(currentUrl, "file:///android_asset/kaoqin01.html");
+            if (currentUrl != null && equalStr) {
+                initWebView("file:///android_asset/kaoqin01.html");//本地考勤地址
+                fab.show();
+                return false;
+            }else {
+                return super.onKeyUp(keyCode, event);
+            }
+    }
 }

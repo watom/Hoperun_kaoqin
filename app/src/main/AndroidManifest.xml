@@ -33,6 +33,10 @@
         </activity>
         <activity android:name=".activity.UserInfoQuery"  />
         <activity android:name=".activity.ShareAppActivity"  />
-
+        <activity android:name=".activity.AboutUSActivity"  />
+        <activity android:name=".activity.SetTimeActivity"  />
+        <activity android:name=".activity.TimingLaunchActivity"  />
+        <receiver android:name=".MyReceiver" android:process=":newinst"/>
+        <receiver android:name=".broadcast_receiver.AlarmReceiver" android:process=":remote" />
     </application>
 </manifest>

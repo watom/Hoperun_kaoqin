@@ -1,36 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
-    android:background="@drawable/side_nav_bar"
+    android:background="@drawable/bg_zhonglou"
     android:gravity="bottom"
-    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
-
+    <LinearLayout
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@+id/tv_title"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:background="@drawable/corner_bg"
+        android:visibility="invisible"
+        android:orientation="vertical">
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:src="@drawable/timg"
+        android:layout_alignParentLeft="true"
+        />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/tv_title"
+        android:layout_alignParentLeft="true"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
-        app:srcCompat="@android:drawable/sym_def_app_icon" />
-
+        android:orientation="vertical">
     <TextView
         android:id="@+id/UseName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:text="昵称"
+        android:text="西安润和软件信息技术有限公司"
+        android:textStyle="bold"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="wrap_content"
+        android:layout_below="@+id/UseName"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="您的邮箱" />
-
-</LinearLayout>
+        android:text="地址：陕西省西安市高新区天谷八路156号软件新城研发基地二期C2栋16层"
+        android:textColor="#4d9888"/>
+    </LinearLayout>
+</RelativeLayout>

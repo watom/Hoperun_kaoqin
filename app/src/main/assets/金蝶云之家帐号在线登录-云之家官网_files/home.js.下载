@@ -1,0 +1,374 @@
+var homePage = {
+		$:jQuery,
+		_checkOk: false,
+		_target:this.$(''),
+		_initAnimate: function(){
+			this.$('.translate_y').hover(
+				function() {
+					var $this = $(this);
+					$this.find('a').fadeIn(150);
+				},
+				function() {
+					var $this = $(this);
+					$this.find('a').fadeOut(150);
+				}
+			);
+		},
+		_initBindRegBtn: function(){
+			var me = this,
+				$input = this.$('.registered-User'),
+				$regForm = this.$('.regForm'),
+				$regBtn = this.$('.registered-btn'),
+				placeHolder = $input.attr('placeholder'),
+				pattern = /^[_a-zA-Z0-9-]+(\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,4})$/,
+				patternForPhone = /^\d{11}$/;
+
+			$regForm.submit(function(e){
+				if(!me._checkOk) {
+					e.preventDefault();
+					return;
+				}
+			});
+			$regBtn.click(function(e){
+				me._target = me.$(e.target);
+				me._checkBeforeSubmit();
+				var $regForm = me._target.closest('.regForm');
+				$regForm.submit();
+			});
+			$input.keyup(function(e){
+				me._target = me.$(e.target);
+				var $regForm = me._target.closest('.regForm');
+				if(e.keyCode == 13) {
+					me._checkBeforeSubmit();
+					$regForm.submit();
+				}
+			});
+		},
+
+		_initErrorMsgBtn: function() {
+			var	$errorMsg = this.$('.error-msg'),
+			 	$closeBtn = $errorMsg.find('em');
+			 $closeBtn.click(function(){
+			 	$errorMsg.hide();
+			 });
+		},
+
+		_checkBeforeSubmit: function() {
+			var me = this,
+				$ = this.$,
+				$regForm = this._target.closest('.regForm'),
+				$input = $regForm.find('.registered-User'),
+				placeHolder = $input.attr('placeholder'),
+				inputVal = $input.val(),
+				pattern = /^[_a-zA-Z0-9-]+(\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,4})$/,
+				patternForPhone = /(^1[0-9]{10}$)|(^\+([0-9]{1,4})-([0-9]{1,15})$)/;
+
+			if (inputVal.length == 0 || inputVal == placeHolder) {
+				this._setFocus(placeHolder);
+				return false;
+			}
+
+		    if (!inputVal.match(pattern) && !inputVal.match(patternForPhone)){
+		    	this._setFocus('无效的邮箱地址或手机号，请重新输入');
+		    	return false;
+		    }
+
+			K.req({
+				async: false,
+				url: '/space/c/rest/user/pre-signup',
+				type: 'POST',
+				data: {email: inputVal},
+				s: function (resp) {
+					if(resp.isRegAccount) {
+						// me._popLoginDialog(inputVal);
+						this._setFocus('你已经是云之家的用户，请直接登录');
+					}
+					else if(resp.countUserActivation > 0){
+						me._popInvitedTipsDialog(inputVal, resp.countUserActivation);
+					}else if(resp.isForbidReg){
+					    me._setFocus('该邮箱域名已经启用自动同步功能');
+					    return false;
+					}
+					else {
+						me._checkOk = true;
+						$regForm.submit();
+					}
+
+				},
+				f: function (resp) {
+				},
+				e: function (resp) {
+				},
+				scope: this
+			});
+		},
+
+		_setFocus: function (text) {
+			var $ = this.$,
+				$registered = this._target.closest('.registered'),
+				$regBtn = $registered.find('.registered-btn'),
+				$errorMsg = $registered.find('.error-msg'),
+				$input = $registered.find('.registered-User');
+
+			if(!text) {
+				return false;
+			}
+			$regBtn.addClass('disabled');
+			$errorMsg.find('.msg-text').text(text).fadeIn(200).delay(3000).fadeOut(800, function() {
+				$regBtn.removeClass('disabled');
+			});
+			$input.val('').focus();
+		},
+
+		/*The account has been invited...*/
+		_popInvitedTipsDialog: function(inputVal, invitationCount) {
+			var me = this,
+			$regForm = this._target.closest('.regForm');
+			S.invitedTipsDialog.open({
+				inputVal: inputVal,
+				invitationCount: invitationCount,
+				continueReg: function() {
+					me._checkOk = true;
+					me.get$('signupForm').submit();
+				}
+			});
+		},
+
+		_popLoginDialog: function(inputVal) {
+			var me = this;
+			console.log(S)
+			S.loginDialog.open({
+				onYes: function() {
+					me._dialogLogin();
+				},
+				inputVal: inputVal
+			});
+		},
+
+		/*Login from dialog*/
+		_dialogLogin: function(e){
+			var $ = this.$,
+				$email = $('#login-email'),
+				em = $.trim($email.val()),
+				$pwd = $('#login-password'),
+				pwd = $.trim($pwd.val()),
+				remember = ($('#login_rmb').attr('checked')=='check')?true:false,
+				redirectUrl = '/microblog',
+				accountNameValue = '',
+				accountTypeValue = '',
+				networkId = '';
+
+			if(!em || (!K.String.checkEmail(em) && !K.String.checkMobilePhone(em))){
+				this._inputWarn($email, '请输入有效邮箱地址或手机号码');
+				return false;
+			}
+
+			if(!pwd){
+		    	this._inputWarn($pwd, '请输入密码');
+		        return false;
+			}
+
+			K.req({
+				url: '/space/c/rest/user/login',
+				type: 'POST',
+				data: {
+					email: em,
+					password: pwd,
+					remember: remember,
+					accountType: accountTypeValue,
+					accountName: accountNameValue,
+					networkId: networkId,
+					redirectUrl: redirectUrl,
+					forceToNetwork: false
+				},
+				s: function (resp) {
+					if(resp['redirectUrl']){
+						location.href = resp.redirectUrl;
+					}else{
+						location.href = redirectUrl ? redirectUrl : '/';
+					}
+				},
+				f: function (resp) {
+					if (resp['errorCode'] == 1) {
+						S.ToSignUpDialog.open();
+					} else if (resp['errorCode'] == 3) {
+						this._inputWarn($email, resp['errormsg'] || '账号尚未激活');
+					}else if(resp.error && resp.error.code == "ip_security_exception"){
+						this._inputWarn($email, '你当前所处的网络地址已被公司管理员设置为禁止登录，请更换网络后重试。');
+					}else if(resp.errorType == "noJoinNetwork"){
+						location.href="/space/c/team/login-no-join-network";
+					}else {
+						this._inputWarn($email, resp['errormsg'] || '邮箱或密码错误');
+					}
+				},
+				e: function (resp) {
+					if (resp.errorType == "noJoinNetwork") {location.href="/space/c/team/login-no-join-network";}
+					this._inputWarn($email, '网络异常');
+				},
+				scope: this
+			});
+			return false;
+		},
+
+		_inputWarn: function($el, message){
+			K.handyWarn({
+				msg: message,
+				rel: this.$('.login-dialog .btn'),
+				relPos: 'top'
+			});
+	        $el.focus();
+		},
+		/*
+		_initNivoSlider: function(){
+			$(window).load(function(){
+				$('#slider-img').nivoSlider({
+					effect: 'random',
+					pauseTime: 3000
+				});
+			});
+		},*/
+		// initPlaceholder: function(){    //兼容低版本IE浏览器的placeholder,注意jQuery从1.9开始已经不支持浏览器检测了
+		// 	if($.browser.msie && ( $.browser.version<=9)){
+		// 		$('[placeholder]').focus(function(){
+		// 			var input = $(this);
+		// 			if(input.val() == input.attr('placeholder')){
+		// 			input.removeClass("placeholder");
+		// 			input.val('');
+		// 			}
+		// 		})
+		// 		.blur(function(){
+		// 			var input = $(this);
+		// 			if(input.val() == '' || input.val() == input.attr('placeholder')){
+		// 				input.addClass("placeholder");
+		// 				input.val(input.attr('placeholder'));
+		// 			}
+		// 		}).blur();
+		// 	}
+		// },
+
+		init: function(){
+			var initReg = /^_init\w+$/;
+			for(var i in this){
+				if(this.hasOwnProperty(i) && initReg.test(i)){
+						this[i].apply(this,[]);
+				}
+			}
+			// this.initPlaceholder();
+		}
+};
+
+S.invitedTipsDialog = {
+	_dialog: null,
+
+	_tpl: function(inputVal, invitationCount) {
+		var t = new K.SimpleTemplate();
+
+		t._('<p>系统检查到您输入的 ',inputVal,' 已有 ',invitationCount,' 条加入云之家的邀请记录，您可直接登录邮箱激活账号，或 <a href="#" id="continue-reg">继续注册</a>！</p>')
+		._('<p class="tips">注：如果继续注册，系统将无法获取邀请记录</p>');
+
+		return t.toString();
+	},
+
+	init: function(cfg) {
+		var me = this, $ = this.$;
+		this._dialog = new K.Dialog({
+			cls: 'invited-tips-dialog',
+			title: '激活提示',
+			modal: true,
+			body: me._tpl(cfg.inputVal, cfg.invitationCount),
+			highZindex: true
+		});
+
+		var continueBtn = this._dialog.getBody$().find('#continue-reg');
+		continueBtn.on('click',function(){
+			cfg.continueReg();
+		});
+	},
+	open: function(cfg){
+		if(!this._dialog) {
+			this.init(cfg);
+		}
+		this._dialog.open(true);
+	},
+	close: function() {
+		this._dialog.close(true);
+	}
+};
+
+S.loginDialog = {
+	$: jQuery,
+	_dialog: null,
+	_email: null,
+	_password: null,
+
+	_tpl: function() {
+		var t = new K.SimpleTemplate();
+		t._('<h3>您已经是云之家的用户，请直接登录</h3>')
+		._('<p><input type="text" id="login-email" name="email" placeholder="邮箱/手机号/云号" /></p>')
+		._('<p><input type="password" id="login-password" name="password" placeholder="密码" /></p>')
+		._('<p class="opt"><a class="btn em login-submit" id="login-submit" href="javascript:;"><em>登录</em></a>')
+			._('<input type="checkbox" id="login_rmb" checked="checked"><label for="login_rmb">记住我</label>')
+			._('<a href="/space/c/user/forget-password" class="forget-pwd">忘记密码</a></p>');
+		return t.toString();
+	},
+
+	init: function(cfg) {
+		var me = this, $ = this.$;
+		this._dialog = new K.Dialog({
+			cls: 'login-dialog',
+			title: '登录',
+			modal: true,
+			body: me._tpl(),
+			highZindex: true
+		});
+	},
+
+	_binInputEvent: function() {
+		var me = this,
+			$input = this._dialog.getBody$().find("input[type!='checkbox']"),
+			$nextInput = null, $tg=null;
+
+		$input.on('keyup',function(e){
+			$tg = me.$(e.target);
+			$nextInput = $tg.parent().next('p').find("input[type!='checkbox']");
+			if(e.keyCode == 13) {
+				if($nextInput.length) {
+					$nextInput.focus();
+				}
+				else {
+					me._dialog.getBody$().find('#login-submit').click();
+				}
+			}
+		});
+	},
+
+	_fillForm: function(email) {
+		var $email = this._dialog.getBody$().find('#login-email');
+		$email.val(email);
+	},
+
+	_bindSubmitBtn: function(cfg) {
+		var me = this,
+			$submitBtn = this._dialog.getBody$().find('#login-submit');
+		$submitBtn.on('click',function(){
+			cfg.onYes.call(me);
+		});
+	},
+
+	open: function(cfg){
+		if(!this._dialog) {
+			this.init(cfg);
+		}
+		this._fillForm(cfg.email);
+		this._binInputEvent();
+		this._bindSubmitBtn(cfg);
+		this._dialog.open(true);
+		this._dialog.getBody$().find('#login-password').focus();
+	},
+
+	close: function() {
+		this._dialog.close(true);
+	}
+};
+
+homePage.init();

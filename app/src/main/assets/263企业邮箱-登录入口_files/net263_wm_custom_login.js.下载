@@ -1,0 +1,1010 @@
+// CUSTOM_LOGIN_VERSION $Id: net263_wm_custom_login.js 13195 2017-11-14 03:57:42Z shenxiangchun $
+(function(window) {
+	var log = window.net263.wm.log;
+	var cookie = window.net263.wm.cookie;
+	var request = window.net263.wm.request;
+
+	var c_custom_login_type = "";
+	var c_custom_login_action = {};
+	var c_custom_login_domain = "";
+	var c_custom_login_domain_conf = {};
+	var c_default_domain = "";
+
+	// 多语言
+	var custom_lang = (function() {
+		var inited = false;
+		var langs = [];
+		var lang_names = [];
+		var lang_btntext = [];
+		var cur_lang = "";
+
+		var lang_cn = [];
+		var lang_hk = [];
+		var lang_en = [];
+		var lang_jp = [];
+		var lang_kr = [];
+
+		var wm_chr = [];
+		wm_chr["gb"] = "gb";
+		wm_chr["cn"] = "cn";
+		wm_chr["hk"] = "tw";
+		wm_chr["en"] = "en";
+		wm_chr["jp"] = "jp";
+		wm_chr["kr"] = "ko";
+
+		var ma_chr = [];
+		ma_chr["gb"] = "gb";
+		ma_chr["cn"] = "cn";
+		ma_chr["hk"] = "tw";
+		ma_chr["en"] = "en";
+		ma_chr["jp"] = "jp";
+		ma_chr["kr"] = "kr";
+
+		var items_show_all = "#adminOptionBr";
+		var items_show = [];
+		items_show["gb"] = "";
+		items_show["cn"] = "";
+		items_show["hk"] = "";
+		items_show["en"] = "";
+		items_show["jp"] = "#adminOptionBr";
+		items_show["kr"] = "#adminOptionBr";
+
+		var getLanguage = function() {
+			if (cur_lang && lang_names[cur_lang]) {
+				return cur_lang;
+			}
+			cur_lang = net263.wm.request.getParameter("lang");
+			if (cur_lang && lang_names[cur_lang]) {
+				return cur_lang;
+			}
+			cur_lang = net263.wm.request.getHashParameter("lang");
+			if (cur_lang && lang_names[cur_lang]) {
+				return cur_lang;
+			}
+			cur_lang = cookie.cookie("wm_custom_login_lang");
+			if (cur_lang && lang_names[cur_lang]) {
+				return cur_lang;
+			}
+			cur_lang = "gb";
+			try {
+				var lang = net263.wm.browser.getLanguage();
+				if (lang.indexOf("ja") >= 0) {
+					cur_lang = "jp";
+				} else if (lang.indexOf("JP") >= 0) {
+					cur_lang = "jp";
+				} else if (lang.indexOf("ko") >= 0) {
+					cur_lang = "kr";
+				} else if (lang.indexOf("KR") >= 0) {
+					cur_lang = "kr";
+				} else if (lang.indexOf("TW") >= 0) {
+					cur_lang = "hk";
+				} else if (lang.indexOf("HK") >= 0) {
+					cur_lang = "hk";
+				} else if (lang.indexOf("en") >= 0) {
+					cur_lang = "en";
+				}
+			} catch (e) {
+				log.error(e);
+			}
+			return cur_lang;
+		};
+
+		var setLanguage = function(lang, need_set_cookie) {
+			if (!lang || !lang_names[lang]) {
+				return;
+			}
+			if (cur_lang == lang && inited) {
+				return;
+			}
+			cur_lang = lang;
+			if (cur_lang != "gb") {
+				net263.wm.request.setHashParameter("lang", cur_lang, true);
+			}
+			if (need_set_cookie) {
+				cookie.cookie("wm_custom_login_lang", cur_lang);
+			}
+			$(items_show_all).hide();
+			$(items_show[cur_lang]).show();
+			$("#cl_input_wm_chr").val(wm_chr[cur_lang]);
+			$("#cl_input_ma_chr").val(ma_chr[cur_lang]);
+			$("#languageBtn").text(lang_btntext[cur_lang]);
+			var texts = langs[cur_lang];
+			for ( var idx in texts) {
+				try {
+					var item = $("#" + idx);
+					if (item.prop("tagName") == "INPUT") {
+						item.val(texts[idx]);
+					} else {
+						item.text(texts[idx]);
+					}
+				} catch (e) {
+					log.error(e);
+				}
+			}
+			inited = true;
+		};
+
+		var getText = function(name) {
+			try {
+				var lang = cur_lang;
+				if (!lang || !langs[cur_lang]) {
+					lang = "gb";
+				}
+				return (langs[lang])[name];
+			} catch (e) {
+				log.error(name, cur_lang, langs);
+				return "";
+			}
+		};
+
+		var getLanguageName = function() {
+			return lang_names[getLanguage()];
+		};
+
+		lang_names["gb"] = "默认";
+		lang_names["cn"] = "中文（简）";
+		lang_names["hk"] = "中文（繁）";
+		lang_names["en"] = "English";
+		lang_names["jp"] = "日本語";
+		lang_names["kr"] = "한국어";
+		
+		lang_btntext["gb"] = "语言";
+		lang_btntext["cn"] = "语言";
+		lang_btntext["hk"] = "語言";
+		lang_btntext["en"] = "Language";
+		lang_btntext["jp"] = "言語";
+		lang_btntext["kr"] = "언어";
+
+		langs["gb"] = lang_cn;
+		langs["cn"] = lang_cn;
+		langs["hk"] = lang_hk;
+		langs["en"] = lang_en;
+		langs["jp"] = lang_jp;
+		langs["kr"] = lang_kr;
+
+		lang_cn[""] = "";
+		lang_hk[""] = "";
+		lang_en[""] = "";
+		lang_jp[""] = "";
+		lang_kr[""] = "";
+
+		lang_cn["showTabUser"] = "用户登录";
+		lang_hk["showTabUser"] = "用戶登錄";
+		lang_en["showTabUser"] = "User login";
+		lang_jp["showTabUser"] = "ログイン";
+		lang_kr["showTabUser"] = "로그인(login)";
+
+		lang_cn["showTabAdmin"] = "管理员登录";
+		lang_hk["showTabAdmin"] = "管理員登錄";
+		lang_en["showTabAdmin"] = "Administrator login";
+		lang_jp["showTabAdmin"] = "管理者ログイン";
+		lang_kr["showTabAdmin"] = "관리자 로그인";
+
+		lang_cn["sslSafeLogin"] = "安全登录";
+		lang_hk["sslSafeLogin"] = "安全登錄";
+		lang_en["sslSafeLogin"] = "Security Login";
+		lang_jp["sslSafeLogin"] = "安全状態で登録します";
+		lang_kr["sslSafeLogin"] = "보안 로그인";
+
+		lang_cn["sslAdminSafeLogin"] = "安全登录";
+		lang_hk["sslAdminSafeLogin"] = "安全登錄";
+		lang_en["sslAdminSafeLogin"] = "Security Login";
+		lang_jp["sslAdminSafeLogin"] = "安全状態で登録します";
+		lang_kr["sslAdminSafeLogin"] = "보안 로그인";
+		
+		lang_cn["clearTrace"] = "清除痕迹";
+		lang_hk["clearTrace"] = "清除痕跡";
+		lang_en["clearTrace"] = "Clear Trace";
+		lang_jp["clearTrace"] = "跡をクリアする";
+		lang_kr["clearTrace"] = "흔적을 없애다";
+		
+		lang_cn["adminClearTrace"] = "清除痕迹";
+		lang_hk["adminClearTrace"] = "清除痕跡";
+		lang_en["adminClearTrace"] = "Clear Trace";
+		lang_jp["adminClearTrace"] = "跡をクリアする";
+		lang_kr["adminClearTrace"] = "흔적을 없애다";
+
+		lang_cn["canNotLogin"] = "忘记用户密码？";
+		lang_hk["canNotLogin"] = "忘記用戶密碼？";
+		lang_en["canNotLogin"] = "Forgot Password";
+		lang_jp["canNotLogin"] = "ﾊﾟｽﾜｰﾄﾞを忘れ";
+		lang_kr["canNotLogin"] = "비밀번호 찾기";
+		
+		lang_cn["canNotAdminLogin"] = "忘记管理员密码？";
+		lang_hk["canNotAdminLogin"] = "忘記管理員密碼？";
+		lang_en["canNotAdminLogin"] = "Forgot administrator password";
+		lang_jp["canNotAdminLogin"] = "管理者のパスワードを忘れて";
+		lang_kr["canNotAdminLogin"] = "잊고 관리자 암호를";
+
+		lang_cn["usernameTip"] = "邮箱帐号";
+		lang_hk["usernameTip"] = "郵箱賬號";
+		lang_en["usernameTip"] = "Email";
+		lang_jp["usernameTip"] = "Email";
+		lang_kr["usernameTip"] = "아이디（ID）";
+
+		lang_cn["userType"] = "密 码";
+		lang_hk["userType"] = "密 碼";
+		lang_en["userType"] = "password";
+		lang_jp["userType"] = "パスワード";
+		lang_kr["userType"] = "비밀번호";
+
+		lang_cn["adminType"] = "密 码";
+		lang_hk["adminType"] = "密 碼";
+		lang_en["adminType"] = "password";
+		lang_jp["adminType"] = "パスワード";
+		lang_kr["adminType"] = "비밀번호";
+
+		lang_cn["adminSectury"] = "密 保";
+		lang_hk["adminSectury"] = "密 保";
+		lang_en["adminSectury"] = "Security card number";
+		lang_jp["adminSectury"] = "セキュリティカード";
+		lang_kr["adminSectury"] = "빽빽하게 지킵니다 ";
+
+		lang_cn["wmSubBtn"] = "登 录";
+		lang_hk["wmSubBtn"] = "登 錄";
+		lang_en["wmSubBtn"] = "Sign in";
+		lang_jp["wmSubBtn"] = "ログイン";
+		lang_kr["wmSubBtn"] = "로그인";
+
+		lang_cn["maSubBtn"] = "登 录";
+		lang_hk["maSubBtn"] = "登 錄";
+		lang_en["maSubBtn"] = "Sign in";
+		lang_jp["maSubBtn"] = "ログイン";
+		lang_kr["maSubBtn"] = "로그인";
+
+		lang_cn["typeLabSupperAdmin"] = "超级域管理员";
+		lang_hk["typeLabSupperAdmin"] = "超級域管理員";
+		lang_en["typeLabSupperAdmin"] = "Administrator";
+		lang_jp["typeLabSupperAdmin"] = "管理者";
+		lang_kr["typeLabSupperAdmin"] = "관리자";
+
+		lang_cn["typeLabDomainAdmin"] = "域管理员";
+		lang_hk["typeLabDomainAdmin"] = "域管理員";
+		lang_en["typeLabDomainAdmin"] = "Sub-administrator";
+		lang_jp["typeLabDomainAdmin"] = "副管理者";
+		lang_kr["typeLabDomainAdmin"] = "하위 관리자 ";
+
+		lang_cn["adminnameTip"] = "管理员帐号";
+		lang_hk["adminnameTip"] = "管理員賬號";
+		lang_en["adminnameTip"] = "Administrator account";
+		lang_jp["adminnameTip"] = "管理者のアカウント";
+		lang_kr["adminnameTip"] = "관리인의 어카운트(account)";
+
+		lang_cn["userTypePwdCapitalOpen"] = "大写状态已打开";
+		lang_hk["userTypePwdCapitalOpen"] = "大寫狀態已打開";
+		lang_en["userTypePwdCapitalOpen"] = "Capital is opened";
+		lang_jp["userTypePwdCapitalOpen"] = "大文字の状態はオープンです";
+		lang_kr["userTypePwdCapitalOpen"] = "대문자 상태 열려";
+
+		lang_cn["adminTypePwdCapitalOpen"] = "大写状态已打开";
+		lang_hk["adminTypePwdCapitalOpen"] = "大寫狀態已打開";
+		lang_en["adminTypePwdCapitalOpen"] = "Capital is opened";
+		lang_jp["adminTypePwdCapitalOpen"] = "大文字の状態はオープンです";
+		lang_kr["adminTypePwdCapitalOpen"] = "대문자 상태 열려";
+
+		lang_cn["adminSecturyPwdCapitalOpen"] = "大写状态已打开";
+		lang_hk["adminSecturyPwdCapitalOpen"] = "大寫狀態已打開";
+		lang_en["adminSecturyPwdCapitalOpen"] = "Capital is opened";
+		lang_jp["adminSecturyPwdCapitalOpen"] = "大文字の状態はオープンです";
+		lang_kr["adminSecturyPwdCapitalOpen"] = "대문자 상태 열려";
+
+		lang_cn["adminSecturySpan"] = "使用密保登录";
+		lang_hk["adminSecturySpan"] = "使用密保登錄";
+		lang_en["adminSecturySpan"] = "Use the security card";
+		lang_jp["adminSecturySpan"] = "セキュリティカードを使用する";
+		lang_kr["adminSecturySpan"] = "빽빽한 것을 사용해서 등록을 지킵니다 ";
+
+		lang_cn["usernameEmptyWarn"] = "邮箱帐号不能为空！\r\r请重新填写！";
+		lang_hk["usernameEmptyWarn"] = "用戶名不能為空！\r\r請重新填寫！";
+		lang_en["usernameEmptyWarn"] = "UserName can not be empty!\r\rPlease fill it again!";
+		lang_jp["usernameEmptyWarn"] = "ユーザー名は空にすることはできません！\r\rもう一度やり直してください！";
+		lang_kr["usernameEmptyWarn"] = "사용자 이름은 비워둘 수 없습니다！\r\r다시 시도해주십시오.！";
+
+		lang_cn["usernameInvalidWarn"] = "邮箱帐号不符合要求！\r\r请重新填写！";
+		lang_hk["usernameInvalidWarn"] = "用戶名不合要求！\r\r請重新填寫！";
+		lang_en["usernameInvalidWarn"] = "UserName is wrong！\r\rPlease fill it again!";
+		lang_jp["usernameInvalidWarn"] = "ユーザー名要求に合い！\r\rもう一度やり直してください。！";
+		lang_kr["usernameInvalidWarn"] = "사용자 이름은 비정규입니다！\r\r다시 시도해주십시오.！";
+
+		lang_cn["adminnameEmptyWarn"] = "管理员帐号不能为空！\r\r请重新填写！";
+		lang_hk["adminnameEmptyWarn"] = "管理員帳號不能為空！\r\r請重新填寫！";
+		lang_en["adminnameEmptyWarn"] = "Administrator account can not be empty!\r\rPlease fill it again!";
+		lang_jp["adminnameEmptyWarn"] = "管理者アカウントは空にできません！\r\rもう一度やり直してください。！";
+		lang_kr["adminnameEmptyWarn"] = "사용자 이름은 비워둘 수 없습니다！\r\r다시 시도해주십시오.！";
+
+		lang_cn["adminnameInvalidWarn"] = "管理员帐号不符合要求！\r\r请重新填写！";
+		lang_hk["adminnameInvalidWarn"] = "管理員帳號不符合要求！\r\r請重新填寫！";
+		lang_en["adminnameInvalidWarn"] = "Administrator account is wrong!\rPlease fill it again!";
+		lang_jp["adminnameInvalidWarn"] = "管理者アカウント要求に合わない！\r\rもう一度やり直してください。！";
+		lang_kr["adminnameInvalidWarn"] = "사용자 이름은 비정규입니다！\r\r다시 시도해주십시오.！";
+
+		lang_cn["passwordEmptyWarn"] = "密码不能为空！\r\r请重新填写！";
+		lang_hk["passwordEmptyWarn"] = "密碼不能為空！\r\r請重新填寫！";
+		lang_en["passwordEmptyWarn"] = "Password can not be empty!\r\rPlease fill it again!";
+		lang_jp["passwordEmptyWarn"] = "パスワードは空にできません！\r\rもう一度やり直してください。！";
+		lang_kr["passwordEmptyWarn"] = "비밀 번호는 비워둘 수 없습니다！\r\r다시 시도해주십시오.！";
+
+		return {
+			getText : getText,
+			getLanguage : getLanguage,
+			setLanguage : setLanguage,
+			getLanguageName : getLanguageName
+		}
+	})();
+
+	// 登录
+	var custom_login = window.net263.wm.custom_login;
+	if (!custom_login) {
+		custom_login = function() {
+		};
+		window.net263.wm.custom_login = custom_login;
+	}
+
+	var ucode = function(s) {
+		var len = s.length;
+		var rs = "";
+		for ( var i = 0; i < len; i++) {
+			var k = s.substring(i, i + 1);
+			rs += "$" + (s.charCodeAt(i) + "1") + ";";
+		}
+		return rs;
+	};
+
+	var resetInputTip = function(input, input_tip) {
+		input_tip.bind("focus", function() {
+			$(this).hide();
+			input.show();
+			input.focus();
+		});
+
+		input.bind("blur", function() {
+			if ($(this).val() != "")
+				return;
+			$(this).hide();
+			input_tip.show();
+		});
+
+		var val = $.trim(input.val());
+		if (val && val != "") {
+			input.show();
+			input_tip.hide();
+		} else {
+			input.hide();
+			input_tip.show();
+		}
+	};
+
+	var getDomainFromMail = function(email) {// 截取域名
+		var pos = email.indexOf("@");
+		if (pos < 0) {
+			return "";
+		} else {
+			return $.trim(email.slice(pos + 1)).toLowerCase();
+		}
+	};
+
+	var getNameFromMail = function(email) {// 截取名字
+		var pos = email.indexOf("@");
+		if (pos < 0) {
+			return $.trim(email).toLowerCase();
+		} else {
+			if (pos == 0) {
+				return "";
+			} else {
+				return $.trim(email.substring(0, pos)).toLowerCase();
+			}
+		}
+	};
+
+	var isPeisonWM = function(domain) {// 判断是否是个邮
+		var flag = false;
+		var personDoamins = new Array("263.net", "263.net.cn", "x263.net");
+		for ( var i = 0; i < personDoamins.length; i++) {
+			if (personDoamins[i] == domain) {
+				flag = true;
+				break;
+			}
+		}
+		return flag;
+	};
+
+	var isLoginUseName = function() {
+		if ("CUSTOM" == c_custom_login_type) {
+			try {
+				if (c_custom_login_domain_conf.loginUseEmail) {
+					return false;
+				}
+			} catch (e) {
+			}
+		}
+		return c_custom_login_type != "COMMON"
+				&& c_custom_login_type != "TRACELESS"
+				&& c_custom_login_type != "OVERSEAS";
+	};
+
+	var loginExam = function(user, domain) { // 判断个邮帐号的登陆地址
+		var head = document.getElementsByTagName('head').item(0);
+		script = document.createElement('script');
+		script.src = 'http://wmnew.263.net/mail/login/opt/loginAction_examUser.do?usr='
+				+ user
+				+ "&domain="
+				+ domain
+				+ "&tempTime="
+				+ (new Date().getTime());
+		script.type = 'text/javascript';
+		script.defer = false;
+		void (head.appendChild(script));
+	};
+	
+	var beforeLoginSubmit = function() {
+		if (c_custom_login_action.safe_login) {
+			$("#safelogin").attr("checked", "checked");
+			$("#safeloginMa").attr("checked", "checked");
+			$("#safelogin").removeAttr("disabled");
+			$("#safeloginMa").removeAttr("disabled");
+		}
+	};
+
+	var checkWM = function() {
+		var onlyName = isLoginUseName();
+		var username = $.trim($("#username").val().toLowerCase());
+		if (onlyName) {
+			username = getNameFromMail(username);
+		}
+		$("#username").val(username);
+		if (username == "") {
+			alert(custom_lang.getText("usernameEmptyWarn"));
+			$("#usernameTip").hide();
+			$("#username").show();
+			$("#username").focus();
+			return false;
+		}
+		if ((onlyName) ^ (username.indexOf("@") < 0)) {
+			alert(custom_lang.getText("usernameInvalidWarn"));
+			$("#usernameTip").hide();
+			$("#username").show();
+			$("#username").focus();
+			return false;
+		}
+		if ($("#userTypePwd").val() == "") {
+			alert(custom_lang.getText("passwordEmptyWarn"));
+			$("#userType").hide();
+			$("#userTypePwd").show();
+			$("#userTypePwd").focus();
+			return false;
+		}
+		return true;
+	};
+
+	var loginWM = function(ver) {// wm登录
+		if (!checkWM()) {
+			return false;
+		}
+		var wm = document.form_wm;
+		cookie.cookie("wm_custom_login_username", $("#username").val());
+		cookie.cookie("wm_custom_login_wm_ssl",
+				$("#safelogin").is(":checked") ? "1" : "0");
+		wm.domain.value = (!isLoginUseName()) ? getDomainFromMail($("#username")
+				.val())
+				: c_custom_login_domain;
+		wm.usr.value = getNameFromMail($("#username").val());
+		wm.buttonType.value = 1;
+		var q = "host=" + request.urlEncode(request.getHost()) + "&_t="
+				+ (new Date()).getTime();
+
+		// 判断是否安全登录
+		if ("COMMON" == c_custom_login_type
+				|| (c_custom_login_type != "TRACELESS"
+						&& c_custom_login_type != "OVERSEAS" && $("#safelogin")
+						.is(":checked"))) {
+			wm.action = "https://" + c_default_domain + "/xmweb?" + q;
+		} else {
+			wm.action = "http://" + request.getHost() + "/xmweb?" + q;
+		}
+		var pwdUnFn1 = ucode(wm.pass.value);
+		wm.pass.value = pwdUnFn1;
+		beforeLoginSubmit();
+		wm.submit();
+		$("#wmSubBtn").unbind("click");
+	};
+
+	var checkMA = function() {// 验证ma表格
+		var onlyName = isLoginUseName();
+		var adminname = $.trim($("#adminname").val().toLowerCase());
+		if (onlyName) {
+			adminname = getNameFromMail(adminname);
+		}
+		$("#adminname").val(adminname);
+		if ($("#adminname").val() == "") {
+			alert(custom_lang.getText("usernameEmptyWarn"));
+			$("#adminnameTip").hide();
+			$("#adminname").show();
+			$("#adminname").focus();
+			return false;
+		} else if ((onlyName) ^ $("#adminname").val().indexOf("@") < 0) {
+			alert(custom_lang.getText("usernameInvalidWarn"));
+			$("#adminnameTip").hide();
+			$("#adminname").show();
+			$("#adminname").focus();
+			return false;
+		}
+		if (document.form_ma.pswd.value == "") {
+			alert(custom_lang.getText("passwordEmptyWarn"));
+			$("#adminType").hide();
+			$("#adminTypePwd").show();
+			$("#adminTypePwd").focus();
+			return false;
+		}
+		return true;
+	};
+
+	var checkMaDomain = function() {// 禁止融资融券ma账号登陆
+		var flag = true;
+		var dom = (!isLoginUseName()) ? getDomainFromMail($("#adminname").val())
+				: c_custom_login_domain;
+		var rzrqDomainArr = new Array("hysec.263.net", "swsc.263.net",
+				"gyzq.263.net", "rzrq.qlzq.com.cn", "csc.263.net",
+				"yinhe.263.net", "rzrq.htsc.com.cn");
+		for ( var i = 0; i < rzrqDomainArr.length; i++) {
+			if (rzrqDomainArr[i] == dom) {
+				flag = false;
+				var str = confirm("尊敬的融资融券用户，您好\n\n"
+						+ "    您是我们的融资融券用户，您需要在融资融券专用邮件系统登陆。\n"
+						+ "请点击确认进入 http://ma.rzrq.263.net/ ，重新输入用户名和密码登录。\n"
+						+ "感谢您的使用。\n\n"
+						+ "                                 263融资融券专用邮箱客服组");
+				if (str) {
+					window.location.href = 'http://ma.rzrq.263.net/';
+				}
+				break;
+			}
+		}
+		return flag;
+	};
+
+	var logonMA = function() {// ma登录
+		if (checkMA() && checkMaDomain()) {
+			var adminname = $.trim($("#adminname").val().toLowerCase());
+			if (isLoginUseName()) {
+				adminname = getNameFromMail(adminname) + "@"
+						+ c_custom_login_domain;
+			}
+			$("#adminnameUser").val(adminname);
+			cookie.cookie("wm_custom_login_adminname", $("#adminname").val());
+			cookie.cookie("wm_custom_login_ma_ssl", $("#safeloginMa").is(
+					":checked") ? "1" : "0");
+			cookie.cookie("wm_custom_login_ma_security", $("#security").is(
+					":checked") ? "1" : "0");
+			$("#maSubBtn").unbind("click");
+
+			var q = "host=" + request.urlEncode(request.getHost()) + "&_t="
+					+ (new Date()).getTime();
+
+			if ("COMMON" == c_custom_login_type
+					|| (c_custom_login_type != "OVERSEAS" && $("#safeloginMa")
+							.is(":checked"))) {
+				document.form_ma.action = "https://" + c_default_domain + "/ma-bin/ma_main.cgi?"
+						+ q;
+			} else {
+				document.form_ma.action = "http://" + request.getHost()
+						+ "/ma-bin/ma_main.cgi?" + q;
+			}
+			beforeLoginSubmit();
+			document.form_ma.submit();
+		} else {
+			return false;
+		}
+	};
+
+	var setMainBoxSizeCnt = 0;
+	var lastSetMainBoxSizeHeight = -10;
+	var lastSetMainBoxSizeWidth = -10;
+	var setMainBoxSize = function() {
+		if (setMainBoxSizeCnt++ > 1000) {
+			$(window).off("resize");
+			return;
+		}
+		var h = Math.max($(document).height(), $(window).height());
+		var w = Math.max($(window).width(), 782);
+
+		// 避免IE 部分浏览器设置 mainBox 时， 造成window.onresize 事件循环
+		if (!(Math.abs(h - lastSetMainBoxSizeHeight) < 3 && Math.abs(w
+				- lastSetMainBoxSizeWidth) < 3)) {
+			$(".mainBox").height(h);
+			$(".mainBox").width(w);
+			lastSetMainBoxSizeHeight = h;
+			lastSetMainBoxSizeWidth = w;
+		}
+	};
+
+	var resetLoginEmailInputSize = function(nameInputId, domainInputId, domain,
+			maxDomainWidth, minDomainWidth) {
+		if (!isLoginUseName()) {
+			$("#" + domainInputId).hide();
+			return;
+		}
+		$("#" + domainInputId + "_txt").text("@" + domain);
+		var di = $("#" + domainInputId).attr("title", domain);
+		var ui = $("#" + nameInputId + ", #" + nameInputId + "Tip");
+		var totalWidth = $("#" + nameInputId).width() + di.width();
+		di.css("overflow", "visible");
+		di.css("text-overflow", "clip");
+		di.css("width", "auto");
+		var width = Math.min(maxDomainWidth, Math.max(minDomainWidth, di
+				.width() + 4));
+		di.width(width);
+		di.css("overflow", "hidden");
+		di.css("text-overflow", "ellipsis");
+		ui.width(totalWidth - width);
+	};
+
+	var isResetLoginEmailInputSized = false;
+	var showTabUser = function() {
+		if (!$(this).hasClass("current")) {
+			$("#showTabUser").addClass("current");
+			$("#showTabAdmin").removeClass("current");
+			$("#tabUser").show();
+			$("#tabAdmin").hide();
+			$("#canNotAdminLogin").hide();
+			$("#canNotLogin").show();
+			if (!isResetLoginEmailInputSized) {
+				resetLoginEmailInputSize("username", "cl_span_domain",
+						c_custom_login_domain, 160, 76);
+				isResetLoginEmailInputSized = true;
+			}
+		}
+	};
+
+	var isResetAdminLoginEmailInputSized = false;
+	var showTabAdmin = function() {
+		if (!$(this).hasClass("current")) {
+			$("#showTabUser").removeClass("current");
+			$("#showTabAdmin").addClass("current");
+			$("#tabAdmin").show();
+			$("#tabUser").hide();
+			$("#canNotLogin").hide();
+			$("#canNotAdminLogin").show();
+			if (!isResetAdminLoginEmailInputSized) {
+				resetLoginEmailInputSize("adminname", "cl_span_admin_domain",
+						c_custom_login_domain, 160, 76);
+				isResetAdminLoginEmailInputSized = true;
+			}
+		}
+	};
+
+	var resetForm = function() {
+		$("#usernameTip, #adminnameTip, #userType , #adminType , #adminSectury")
+				.show();
+		$(
+				"#username, #adminname, #userTypePwd , #adminTypePwd , #adminSecturyPwd")
+				.hide();
+		$(
+				"#username, #adminname, #userTypePwd , #adminTypePwd , #adminSecturyPwd")
+				.val("");
+		cookie.del("wm_custom_login_username");
+		cookie.del("wm_custom_login_adminname");
+	};
+
+	custom_login.homepage_init = function(type, action, domain_conf, html_tmpl, default_domain) {
+		log.debug(type, action, domain_conf, html_tmpl);
+		c_custom_login_type = type;
+		c_custom_login_action = action;
+		c_custom_login_domain_conf = domain_conf;
+		c_default_domain = default_domain;
+		if (isLoginUseName()) {
+			c_custom_login_domain = action.domain;
+		}
+
+		// 用户自定义页面
+		if (type == "CUSTOM") {
+			try {
+				_custom_login_domain_init(type, action, domain_conf, html_tmpl);
+			} catch (e) {
+				log.error(e);
+			}
+		}
+
+		// 无痕迹
+		if (type == "TRACELESS") {
+			$("#cl_top_logo").attr("src",
+					"/custom_login/images/company_logo_3.gif");
+        //	$("#showTabUser").width(336);
+			$("#cl_isp_domain").val("ismail.cn");
+			$(".defaultWid .nav li").remove();
+			$(".defaultWid .nav").append('<li class="hotline">客服邮箱：<span>10000@xmail-service.com</span></li>');
+			$(".defaultWid .nav").show();
+		} else {
+			$(".defaultWid .nav").show();
+			$("#cl_top_desc, #cl_bottom").show();
+			$("#cl_top_desc, #cl_bottom").removeAttr("style");
+			$("#safelogin, #safeloginMa").show();
+			$("#sslSafeLogin, #sslAdminSafeLogin").show();
+			$("#sslSafeLoginSSL, #sslAdminSafeLoginSSL").show();
+			$("#showTabAdmin").show();
+		}
+		$("#cl_top_logo").show();
+
+		// 域名
+		$("#cl_input_domain").val(action.domain);
+		
+		//忘记密码链接
+		var canNotLoginUrl = "/wm2e/website/jsp/resetPassword.jsp";
+		var canNotAdminLoginUrl = "/wm2e/website/jsp/resetPasswordAdmin.jsp";
+		if (type == "COMMON") {
+			canNotLoginUrl = "https://" + c_default_domain + canNotLoginUrl;
+			canNotAdminLoginUrl = "https://" + c_default_domain + canNotAdminLoginUrl;
+		}
+		$("#canNotLogin").attr("href", canNotLoginUrl);
+		$("#canNotAdminLogin").attr("href", canNotAdminLoginUrl);
+
+		// tab切换
+		$("#canNotLogin").show();
+		$("#showTabUser").bind("click", showTabUser);
+		$("#showTabAdmin").bind("click", showTabAdmin);
+
+		// 清除痕迹
+		$(".resetForm").bind("click", resetForm);
+		$(".clearTrace").bind("click", resetForm);
+
+		//
+		$('#username').keypress(function(event) {
+			if (event.keyCode == '13' && $('#username').val() != "") {
+				setTimeout(function() {
+					$("#userType").hide();
+					$("#userTypePwd").show();
+					$("#userTypePwd").focus();
+				}, 100);
+				event.preventDefault();
+			}
+		});
+
+		$('#adminname').keypress(function(event) {
+			if (event.keyCode == '13' && $('#adminname').val() != "") {
+				setTimeout(function() {
+					$("#adminType").hide();
+					$("#adminTypePwd").show();
+					$("#adminTypePwd").focus();
+				}, 100);
+				event.preventDefault();
+			}
+		});
+
+		// 输入密码后回车提交
+		$('#userTypePwd').keypress(function(event) {
+			if (event.keyCode == '13') {
+				loginWM(0);
+				event.preventDefault();
+			}
+		});
+		$('#adminTypePwd,#adminSecturyPwd').keypress(function(event) {
+			if (event.keyCode == '13') {
+				logonMA();
+				event.preventDefault();
+			}
+		});
+
+		// 默认显示VILUE
+		$("#userType").bind("focus", function() {
+			$(this).hide();
+			$("#userTypePwd").val("");
+			$("#userTypePwd").show();
+			$("#userTypePwd").focus();
+		});
+
+		$("#userTypePwd").bind("blur", function() {
+			$("#userTypePwdCapitalOpen").hide();
+			if ($(this).val() != "")
+				return;
+			$(this).hide();
+			$("#userType").show();
+		});
+
+		$("#userTypePwd").bind(
+				"keypress",
+				function(event) {
+					var e = event || window.event;
+					var o = e.target || e.srcElement;
+					var oTip = o.nextSibling;
+					var keyCode = e.keyCode || e.which;
+					var isShift = e.shiftKey || (keyCode == 16) || false;
+					if (((keyCode >= 65 && keyCode <= 90) && !isShift)
+							|| ((keyCode >= 97 && keyCode <= 122) && isShift)) {
+						$("#userTypePwdCapitalOpen").show();
+					} else {
+						$("#userTypePwdCapitalOpen").hide();
+					}
+				});
+
+		$("#userTypePwd").bind("keydown", function(event) {
+			var e = event || window.event;
+			var keyCode = e.keyCode || e.which;
+			if (keyCode == 20) {
+				$("#userTypePwdCapitalOpen").toggle();
+			}
+		});
+
+		$("#adminType").bind("focus", function() {
+			$(this).hide();
+			$("#adminTypePwd").val("");
+			$("#adminTypePwd").show();
+			$("#adminTypePwd").focus();
+		});
+
+		$("#adminTypePwd").bind("blur", function() {
+			$("#adminTypePwdCapitalOpen").hide();
+			if ($(this).val() != "")
+				return;
+			$(this).hide();
+			$("#adminType").show();
+		});
+
+		$("#adminTypePwd").bind("keypress", function(event) {
+			var e = event || window.event;
+			var o = e.target || e.srcElement;
+			var oTip = o.nextSibling;
+			var keyCode = e.keyCode || e.which; // 按键的keyCode
+				var isShift = e.shiftKey || (keyCode == 16) || false; // shift键是否按住
+				if (((keyCode >= 65 && keyCode <= 90) && !isShift) // Caps Lock
+						// 打开，且没有按住shift键
+						|| ((keyCode >= 97 && keyCode <= 122) && isShift)// Caps
+				// Lock
+				// 打开，且按住shift键
+				) {
+					$("#adminTypePwdCapitalOpen").show();
+				} else {
+					$("#adminTypePwdCapitalOpen").hide();
+				}
+			});
+
+		$("#adminTypePwd").bind("keydown", function(event) {
+			var e = event || window.event;
+			var keyCode = e.keyCode || e.which; // 按键的keyCode
+				if (keyCode == 20) {
+					$("#adminTypePwdCapitalOpen").toggle();
+				}
+			});
+
+		$("#adminSectury").bind("focus", function() {
+			$(this).hide();
+			$("#adminSecturyPwd").val("");
+			$("#adminSecturyPwd").show();
+			$("#adminSecturyPwd").focus();
+		});
+
+		$("#adminSecturyPwd").bind("blur", function() {
+			$("#adminSecturyPwdCapitalOpen").hide();
+			if ($(this).val() != "")
+				return;
+			$(this).hide();
+			$("#adminSectury").show();
+		});
+
+		$("#adminSecturyPwd").bind("keypress", function(event) {
+			var e = event || window.event;
+			var o = e.target || e.srcElement;
+			var oTip = o.nextSibling;
+			var keyCode = e.keyCode || e.which; // 按键的keyCode
+				var isShift = e.shiftKey || (keyCode == 16) || false; // shift键是否按住
+				if (((keyCode >= 65 && keyCode <= 90) && !isShift) // Caps Lock
+						// 打开，且没有按住shift键
+						|| ((keyCode >= 97 && keyCode <= 122) && isShift)// Caps
+				// Lock
+				// 打开，且按住shift键
+				) {
+					$("#adminSecturyPwdCapitalOpen").show();
+				} else {
+					$("#adminSecturyPwdCapitalOpen").hide();
+				}
+			});
+
+		$("#adminSecturyPwd").bind("keydown", function(event) {
+			if (event.keyCode == 20) {
+				$("#adminSecturyPwdCapitalOpen").toggle();
+			}
+		});
+
+		// 使用密保
+		$("#security").click(function() {
+			$("p.securityInput").slideToggle("normal");
+		});
+		// wm提交登录
+		$("#wmSubBtn").bind("click", function(event) {
+			loginWM(0);
+		});
+		// ma提交登录
+		$("#maSubBtn").bind("click", function(event) {
+			logonMA();
+		});
+		// 清空密码
+		$("#userTypePwd , #adminTypePwd", "#adminSecturyPwd").val("");
+
+		// 多语言初始化
+		custom_lang.setLanguage(custom_lang.getLanguage());
+		var lang_types = [ "cn", "hk", "en", "jp", "kr" ];
+		for ( var idx in lang_types) {
+			$("#language_" + lang_types[idx]).bind("click", {
+				type : lang_types[idx]
+			}, function(event) {
+				custom_lang.setLanguage(event.data.type, true);
+			});
+		}
+
+		$("#languageBtn").click(function(event) {
+			var x = $(this).offset();
+			$("div.languageBox").slideToggle("slow");
+			$("div.languageBox").offset( {
+				top : x.top - 143,
+				left : x.left
+			});
+			$(this).toggleClass("dropdown_lang_up");
+			event.stopPropagation();
+		});
+
+		$("html").click(function() {
+			$("div.languageBox").slideUp("slow");
+			$("#languageBtn").removeClass("dropdown_lang_up");
+		});
+
+		// 输入框重置
+		if (!isLoginUseName()) {
+			$("#username, #adminname, #usernameTip, #adminnameTip").addClass(
+					"accountInput");
+			$("#username, #adminname, #usernameTip, #adminnameTip")
+					.removeClass("accountInputUser");
+		} else {
+			$("#username, #adminname, #usernameTip, #adminnameTip").addClass(
+					"accountInputUser");
+			$("#username, #adminname, #usernameTip, #adminnameTip")
+					.removeClass("accountInput");
+		}
+		$("#username").val(cookie.cookie("wm_custom_login_username"));
+		$("#adminname").val(cookie.cookie("wm_custom_login_adminname"));
+
+		if ("1" == cookie.cookie("wm_custom_login_wm_ssl")) {
+			$("#safelogin").attr("checked", "checked");
+		}
+
+		if ("1" == cookie.cookie("wm_custom_login_ma_ssl")) {
+			$("#safeloginMa").attr("checked", "checked");
+		}
+
+		if (action.safe_login) {
+			$("#safelogin").attr("checked", "checked");
+			$("#safeloginMa").attr("checked", "checked");
+			$("#safelogin").attr("disabled", "disabled");
+			$("#safeloginMa").attr("disabled", "disabled");
+		}
+		else {
+			$("#safelogin").removeAttr("disabled");
+			$("#safeloginMa").removeAttr("disabled");
+		}
+
+		if ("1" == cookie.cookie("wm_custom_login_ma_security")) {
+			$("#security").attr("checked", "checked");
+		}
+
+		resetInputTip($("#username"), $("#usernameTip"));
+		resetInputTip($("#adminname"), $("#adminnameTip"));
+		showTabUser();
+
+		if ($("#security").is(":checked")) {
+			$("p.securityInput").show();
+		} else {
+			$("p.securityInput").hide();
+		}
+
+		setMainBoxSize();
+		$(window).on("resize", setMainBoxSize);
+
+		var sdt = new Date;
+		sdt.setTime(action.server_datetime);
+		$("#curyear").text(""+sdt.getFullYear());
+
+		var currDomain = window.location.host;
+		if('mm.263.com'==currDomain || 'mail.263.net'==currDomain || 'mail.goertek.com'==currDomain || 'mail.nantian.com.cn'==currDomain){
+			$('#safelogin').attr("checked", "checked");
+			$('#safeloginMa').attr("checked", "checked");
+		}
+	};
+
+})(window);

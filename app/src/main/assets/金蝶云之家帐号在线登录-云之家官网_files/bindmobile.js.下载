@@ -1,0 +1,427 @@
+define(function(require, exports, module) {
+    var $ = require('jquery');
+    var countrySelect = require('countrySelect');
+
+    var params = {
+        phoneNum: '',
+        vcodeId: '',
+        smsCode: '',
+        smsTimeout: false,
+        existEmail: ''
+    }
+
+    var bindMobile = {
+        init: function () {
+            // 重置数据
+            params = {};
+            var me = this;
+            me.bindEvents();
+        },
+
+        bindEvents: function () {
+            var me = this;
+            var closerEl = $('.bindMobile-wrapper .bindMobile-header .closer');
+            var phoneInput = $('#bindMobile-form #phone-num-input');
+            var imageInput = $('#bindMobile-form #image-code-input');
+            var vcodeImg = $('#bindMobile-form .valid-code-img');
+            var smsInput = $('#bindMobile-form #sms-input');
+            var sendSmsBtn = $('#bindMobile-form .sms-cont .normal-btn')
+            
+            closerEl.on('click', function (event) {
+                if (window.dialog) {
+                    var currentDlg = window.dialog.getCurrent()
+                    if (currentDlg) {
+                        currentDlg._trigger('cancel');
+                        event.preventDefault();
+                    }
+                }
+            });
+
+            me.initCountryCode();
+
+            phoneInput.on('input propertychange', function () {
+                $('.phone-cont .tips').removeClass('is-ok').hide();
+                $('.phone-cont .msg').removeClass('error').hide();
+                // vcodeImg.hide();
+            })
+
+            phoneInput.on('blur', function () {
+                $('.vcode-cont .msg')
+                .removeClass('error')
+                .text('')
+                .hide();
+
+                var countryInput = $('#bindMobileCountryCodePanel .country-code');
+                var phoneNum = phoneInput.val();
+                if (!phoneNum) {
+                    $('.phone-cont .msg')
+                    .addClass('error')
+                    .text('请输入手机号')
+                    .show();
+                    return;
+                }
+                var countryCode = $.trim(countryInput.text() + '');
+                if (countryCode !== '+86') {
+                    phoneNum = countryCode + '-' + phoneNum;
+                }
+                phoneNum = encodeURIComponent(phoneNum);
+                params.phoneNum = phoneNum;
+
+                if (me.validatePhone(phoneNum)) {
+                    me.checkPhone(params.phoneNum);
+                }
+            });
+
+            // 图形验证码刷新
+            vcodeImg.on('click', function () {
+                me.getImageCode(params.phoneNum);
+            });
+
+            smsInput.on('focus', function () {
+                $('.sms-cont .msg')
+                .removeClass('error')
+                .text('')
+                .hide();
+            });
+
+            sendSmsBtn.on('click', function () {
+                var phoneNum = $.trim(phoneInput.val());
+                var imgCode = $.trim(imageInput.val());
+                if (!phoneNum) {
+                    $('.phone-cont .msg')
+                    .addClass('error')
+                    .text('请输入手机号')
+                    .show();
+                    return;
+                }
+                if (!me.validatePhone(params.phoneNum)) {
+                    return;
+                }
+                if(!imgCode) {
+                    $('.vcode-cont .msg')
+                    .addClass('error')
+                    .text('请输入图形验证码')
+                    .show();
+                    return;
+                }
+                me.getMobileCode(imageInput.val());
+            }); 
+
+            $('#bindMobile-form .bindMobile-btn').on('click', function () {
+                var phoneNum = $.trim(phoneInput.val());
+                var imgCode = $.trim(imageInput.val());
+                var smsCode = $.trim(smsInput.val());
+                if (!phoneNum) {
+                    $('.phone-cont .msg')
+                    .addClass('error')
+                    .text('请输入手机号')
+                    .show();
+                    return;
+                }
+                if (!me.validatePhone(params.phoneNum)) {
+                    return;
+                }
+                if(!imgCode) {
+                    $('.vcode-cont .msg')
+                    .addClass('error')
+                    .text('请输入图形验证码')
+                    .show();
+                    return;
+                }
+                if (!smsCode) {
+                    $('.sms-cont .msg')
+                    .addClass('error')
+                    .text('请输入手机验证码')
+                    .show();
+                    return;
+                }
+                if (params.smsTimeout) {
+                    $('.sms-cont .msg')
+                    .addClass('error')
+                    .text('手机验证码超时，请重新获取')
+                    .show();
+                    return;
+                }
+                me.bindMobile();
+            });
+        },
+        initCountryCode: function () {
+            var flag = false;
+            var countrySelectObj;
+            var countrySelectorContainer = '#bindMobileCountryCodePanel .country-list-wrap';
+            var countrySelectorSearch = '#bindMobileCountryCodePanel .country-search';
+            var countrySelectorList = '#bindMobileCountryCodePanel .country-list > ul';
+            $('#bindMobileCountryCodePanel').on('click', function(e){
+                e.stopPropagation();
+                if(!flag){
+                    flag = true;
+                    countrySelectObj = countrySelect(function(country){
+                        $('#bindMobileCountryCodePanel .country-code').text(country.code);
+                        $('#bindMobileCountryCodePanel').removeClass('active');
+                    }, countrySelectorContainer, countrySelectorList, countrySelectorSearch);
+                }
+                if($('#bindMobileCountryCodePanel').hasClass('active')){
+                    $('#bindMobileCountryCodePanel').removeClass('active');
+                    countrySelectObj.hide();
+                } else{
+                    $('#bindMobileCountryCodePanel').addClass('active');
+                    countrySelectObj.show();
+                }
+                return false;
+            });
+            $(countrySelectorContainer).on('click', function(e){
+                e.stopPropagation();
+                return false;
+            })
+            $(document).on('click', function(){
+                $(countrySelectorContainer).hide();
+                $('#bindMobileCountryCodePanel').removeClass('active');
+            });
+        },
+
+        validatePhone: function (phoneNum) {
+            var mobile = decodeURIComponent(phoneNum);
+            var chinaMobileReg = /^1[345789]\d{9}$|^(\+852)\-\d{8}$/g; // 中国手机号
+            var globalMobileReg = /^\+\d{1,4}\-\d{1,15}$/g; // 国际手机号
+            var chinaStartCheck = /^\+(86|852)/g;
+            // 手机号验证
+            // 1、中国手机号
+            // 2、验证国际手机号（不以86或者852开头）
+            if (chinaMobileReg.test(mobile) || (!chinaStartCheck.test(mobile) && globalMobileReg.test(mobile))) {
+            } else {
+                $('.phone-cont .msg')
+                .addClass('error')
+                .text('手机号码格式错误，请重新输入')
+                .show();
+                return false;
+            }
+            return true;
+        },
+        // 验证手机号是否可用
+        checkPhone: function (phoneNum) {
+            var me = this;
+            var tips = $('.phone-cont .tips');
+            tips.text('检测手机是否可用...').show();
+            $.ajax({
+                url: '/space/c/user-activate/hasEmailAccount',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                dataType: 'json',
+                data: {
+                    phone: phoneNum
+                }
+            })
+            .done(function (result) {
+                tips.text('').hide();
+                if (result.success) {
+                    var errorMsg = '';
+                    // 手机号已经注册云之家
+                    if (result.accountExist) {
+                        errorMsg = '该手机号码已注册，继续绑定将导致原账户无法登录使用，您可以换个手机或继续绑定。';
+                        // 已经注册的手机号绑定了邮箱。
+                        if (result.hasEmailAccount) {
+                            var emails = result.data.emailAccounts
+                            if (emails && emails.length) {
+                                params.existEmail = emails[0].emailAccount
+                                errorMsg = '该手机号码已绑定云之家邮箱账户：' + emails[0].emailAccount + '；继续绑定将导致原账户无法登录使用，您可以换个手机或继续绑定。'
+                                tips.hide();
+                                $('.phone-cont .msg')
+                                .removeClass('error')
+                                .text(errorMsg)
+                                .show();
+                            }
+                        }
+                        $('.phone-cont .msg')
+                        .removeClass('error')
+                        .text(errorMsg)
+                        .show();
+                    } else {
+                        $('.phone-cont .msg').removeClass('error').hide();
+                        tips.text('手机号可用').addClass('is-ok').show();
+                    }
+                    me.getImageCode(phoneNum);
+                } else {
+                    tips.hide();
+                    $('.phone-cont .msg')
+                    .addClass('error')
+                    .text(result.errormsg || result.errorMsg)
+                    .show();
+                }
+            })
+            .fail(function () {
+                $('.phone-cont .msg')
+                .addClass('error')
+                .text('验证手机号出错，请稍后重试！')
+                .show();
+            })
+        },
+        getImageCode: function (phoneNum) {
+            $.ajax({
+                url: '/space/c/user/refreshVCodeImage',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                dataType: 'json',
+                data: {
+                    mobile: phoneNum
+                }
+            })
+            .done(function (result) {
+                if (result.success) {
+                    var vcodeId = result.vcodeId;
+                    var imgSrc = result.vcodeImageUrl;
+                    
+                    params.vcodeId = vcodeId;
+                    
+                    $('.valid-code-img')
+                    .attr('src', imgSrc)
+                    .show();
+                } else {
+                    $('.vcode-cont .msg')
+                    .addClass('error')
+                    .text(result.error)
+                    .show();
+                } 
+            })
+            .fail(function () {
+                $('.vcode-cont .msg')
+                .addClass('error')
+                .text('获取图形验证码失败，请点击右侧图标重试！')
+                .show();
+            })
+        },
+        getMobileCode: function (vcode) {
+            var me = this;
+            $.ajax({
+                url: '/space/c/user/mobile-validate-code/6/' + params.phoneNum,
+                type: 'GET',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                dataType: 'json',
+                data: {
+                    vcode: vcode,  // 图形验证码的内容
+                    vcodeId: params.vcodeId  // 图形验证码id
+                }
+            })
+            .done(function (result) {
+                if (result.success) {
+                    me.countdown();
+                    $('.vcode-cont .msg')
+                    .removeClass('error')
+                    .text('')
+                    .hide();
+                } else {
+                    $('.vcode-cont .msg')
+                    .addClass('error')
+                    .text(result.errormsg || result.errorMsg)
+                    .show();
+                    // 获取手机号失败，则刷新图形验证码
+                    me.getImageCode(params.phoneNum);
+                }
+            })
+            .fail(function () {
+                $('.sms-cont .msg')
+                .addClass('error')
+                .text('获取手机验证码出错，请稍后重试！')
+                .show();
+            })
+        },
+        countdown: function () {
+            params.smsTimeout = false;
+            
+            var counts = 60;
+            function decreaseFn () {
+                counts--;
+                $('.countdown-btn').text(counts + 's');
+                if (counts > 0) {
+                    setTimeout(decreaseFn, 1000);
+                } else {
+                    params.smsTimeout = true;
+                    $('.sms-cont .normal-btn')
+                    .text('重新获取')
+                    .css('display', 'inline-block');
+
+                    $('.countdown-btn')
+                    .text('60s')
+                    .css('display', 'none');
+                }
+            }
+            $('.sms-cont .normal-btn')
+            .css('display', 'none');
+
+            $('.countdown-btn')
+            .css('display', 'inline-block');
+            setTimeout(decreaseFn, 1000);
+        },
+        bindMobile: function () {
+            var emailLogin;
+            
+            if ('sessionStorage' in window) {
+                emailLogin = sessionStorage.getItem('__email-infos');
+                if (emailLogin) {
+                    emailLogin = JSON.parse(emailLogin);
+                }
+            }
+            $.ajax({
+                url: '/space/c/user-activate/bindEmailAccount',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    email: emailLogin ? emailLogin.email : '',
+                    bindPhone: params.phoneNum,
+                    mobileValidateCode: $.trim($('#bindMobile-form #sms-input').val()),
+                    emailAccountExist: !!params.existEmail,
+                    existEmail: params.existEmail
+                }
+            })
+            .done(function (result) {
+                if (result.success) {
+                    if ('sessionStorage' in window) {
+                        var redirectUrl = sessionStorage.getItem('__rd', redirectUrl) || '/im/xiaoxi/';
+                        sessionStorage.removeItem('__rd');
+                        window.location.href = redirectUrl;
+                        if (emailLogin) {
+                            sessionStorage.removeItem('__email-infos');
+                        }
+                    }
+                    // me.reLogin();
+                } else {
+                    $('#bindMobile-form .form-item').last().find('#error-msg').text(result.errormsg || result.errorMsg);
+                }
+            })
+            .fail(function () {
+                
+            })
+        },
+        reLogin: function () {
+            if ('sessionStorage' in window) {
+                var emailLogin = sessionStorage.getItem('__email-infos');
+                if (emailLogin) {
+                    emailLogin = JSON.parse(emailLogin)
+                    sessionStorage.removeItem('__email-infos');
+                }
+            }
+            $.ajax({
+                url: '/space/c/rest/user/login?' + (new Date()).getTime(),
+                type: 'POST',
+                data: {
+                    email: params.phoneNum,
+                    password: emailLogin ? emailLogin.pwd : '',
+                    remember: emailLogin ? emailLogin.remember : '',
+                    forceToNetwork: false,
+                    redirectUrl: emailLogin ? emailLogin.redirectUrl : '',
+                    accountType: ''
+                }
+            })
+            .done(function (result) {
+                if(result['redirectUrl']){
+                    location.href = result.redirectUrl;
+                }else{
+                    location.href = '/im/xiaoxi/';
+                }
+            })
+            .fail(function () {
+                window.location.reload();
+            });
+        }
+    };
+    module.exports = bindMobile;
+});

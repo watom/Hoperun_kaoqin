@@ -1,0 +1,820 @@
+/**
+ * Dual licensed under the Apache License 2.0 and the MIT license.
+ * $Revision: 740 $ $Date: 2009-12-16 17:59:25 +0100 (Wed, 16 Dec 2009) $
+ */
+
+var cookie;
+(function($)
+{
+
+    var _defaultConfig = {
+        'max-age' : 30 * 60,
+        path : '/'
+    };
+
+    function _set(key, value, options)
+    {
+        var o = $.extend({}, _defaultConfig, options);
+        if (value === null || value === undefined)
+        {
+            value = '';
+            o['max-age'] = 0;
+            o.expires = new Date(new Date().getTime() - 1000);
+        }
+
+        // Create the cookie string
+        var result = key + '=' + encodeURIComponent(value);
+        if (o.expires && o.expires.toUTCString)
+        {
+            result += '; expires=' + o.expires.toUTCString();
+        }
+        if (o['max-age'] && typeof o['max-age'] === 'number')
+        {
+            result += '; max-age=' + o['max-age'];
+        }
+        if (o.path)
+        {
+            result += '; path=' + (o.path);
+        }
+        if (o.domain)
+        {
+            result += '; domain=' + (o.domain);
+        }
+        if (o.secure)
+        {
+            result +='; secure';
+        }
+
+        document.cookie = result;
+    }
+
+    function _get(key)
+    {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; ++i)
+        {
+            var cookie = $.trim(cookies[i]);
+            if (cookie.substring(0, key.length + 1) == (key + '='))
+            {
+                return decodeURIComponent(cookie.substring(key.length + 1));
+            }
+        }
+        return null;
+    }
+    cookie = function(key, value, options)
+     {
+        if (arguments.length > 1)
+        {
+            _set(key, value, options);
+            return undefined;
+        }
+        else
+        {
+            return _get(key);
+        }
+    };
+
+})(jQuery);
+S.m.Login = S.m.Base.extend(function(){
+    function complie(str){
+        if(str === null) return;
+
+        var s = '';
+
+        for(var i = 0, len = str.length; i < len; i++) {
+            s += String.fromCharCode(str.charCodeAt(i) + len);
+        }
+
+        return s;
+    }
+
+    function uncompile(str){
+        if(str === null) return;
+
+        var s = '';
+
+        for(var i = 0, len = str.length; i < len; i++) {
+            s += String.fromCharCode(str.charCodeAt(i) - len);
+        }
+
+        return s;
+    }
+
+    var Cookie = {
+        set: function (name, value, expires) {
+            value = value || '';
+            var text = encodeURIComponent(name) + '=' + encodeURIComponent(value);
+
+            if (value) {
+                if (expires instanceof Date) {
+                    text += '; expires=' + expires.toGMTString();
+                }
+            } else {
+                expires = expires instanceof Date ?
+                    expires : new Date('1970/1/1');
+                text += '; expires=' + expires.toGMTString();
+            }
+
+            document.cookie = text;
+        },
+        get: function (name) {
+            name = encodeURIComponent(name) + '=';
+            var cookie = document.cookie;
+            var start = cookie.indexOf(name);
+            var value = '';
+
+            if (start >= 0) {
+                var end = cookie.indexOf(';', start);
+                end = end < 0 && cookie.length || end;
+                value = cookie.substring(start + name.length, end);
+            }
+
+            return decodeURIComponent(value);
+        }
+    };
+
+    return {
+        h_email: '#email|keyup',
+        h_pwd: '#password|keyup',
+        h_loginBtn: '#log-btn|click',
+        h_remember: '#reme|click',
+        h_bannerBox: '.bannerBox',
+        h_sendMsgBtn: '#sendMsgBtn|*click',
+        h_sendEmailBtn: '#sendEmailBtn|*click',
+        h_sendEmailSuccess: '#sendEmailSuccess|*click',
+        h_verifyBtn: '#verifyBtn|*click',
+        h_youshangBtn: '.lcfc-youshang|click',
+        h_phoneBtn: '.lcfc-phone|click',
+        h_emailBtn: '.lcfc-email|click',
+        h_bindNowBtn: '.bind-mobile-tips .btn.bindNow|click',
+        h_notBindBtn: '.bind-mobile-tips .btn.notBind|click',
+
+        d_loginType: 'phone', // phone/email/youshang
+        // h_refreshVcode: '#refreshVcode|click',
+
+        // //获取图像验证码
+        // _onRefreshVcodeClick: function() {
+        //     K.req({
+        //         url: '/space/c/user/refreshVCodeImage',
+        //         type: 'POST',
+        //         data: {mobile: $.trim($('#email').val())},
+        //         s: function(resp){
+        //           $dialog.find('#refreshVcode').attr('src', resp.vcodeImageUrl);
+        //           $dialog.find('#vcodeId').val(resp.vcodeId);
+        //           $('.vcode-wrap').show();
+        //         },
+        //         f: function(resp) {
+        //             K.handyError({msg: '更新图形验证码失败', rel: $refreshVcode, relPos: 'top'});
+        //         },
+        //         scope: this
+        //     });
+        // },
+
+        ready: function(){
+            var userName = document.getElementById('email');
+            //var passWord = document.getElementById('password');
+
+            var userValue = Cookie.get(complie('userName'));
+            //var passValue = Cookie.get(complie('password'));
+
+            if(userValue) {
+                userName.value = uncompile(userValue);
+                //passValue && (passWord.value = uncompile(passValue));
+                document.getElementById('reme').checked = true;
+            }
+
+        },
+
+        /* global dialog */
+        _onBindNowBtnClick: function () {
+            var toString = Object.prototype.toString
+            var isFunction = function (fn) {
+                return toString.call(fn) === '[object Function]';
+            }
+            if (!dialog || !isFunction(dialog)){
+                return;
+            }
+            dialog({
+                skin: 'dialog-user',
+                title: false,
+                cancel: false,
+                zIndex: 2,
+                padding: '0',
+                content: $('#bindMobile')[0],
+                quickClose: true
+            }).showModal();
+        },
+
+        _onNotBindBtnClick: function () {
+            if ('sessionStorage' in window) {
+                var redirectUrl = sessionStorage.getItem('__rd', redirectUrl) || '/im/xiaoxi/';
+                sessionStorage.removeItem('__rd');
+                window.location.href = redirectUrl;
+            }
+        },
+
+        changeLoginType: function(type){ //phone,email,youshang
+            switch (type){
+                case 'phone':
+                $('.lcf-content li').css({display: 'inline-block'}).eq(2).hide().children('a').css('margin', '0 0')
+                    $('.lcf-content li').css({display: 'inline-block'}).eq(3).hide();
+                    break;
+                case 'email':
+                    $('.lcf-content li').css({display: 'inline-block'}).eq(2).hide().children('a').css('margin', '0 0');
+                    break;
+                case 'youshang': 
+                    $('.lcf-content li').eq(2).hide().children('a').css('margin', '0 30px');
+                    $('.lcf-content li').css({display: 'inline-block'}).eq(1).hide();
+                    break;
+                case 'bind-mobile':
+                    var loginContent = $('.login-content');
+                    var loginForm = loginContent.find('.login-wrap .ui-form-large');
+                    var loginFooter = loginContent.find('.login-content-foot');
+                    var bindMobileNotify = loginContent.fine('.bind-mobile-tips');
+                    loginForm.hide();
+                    loginFooter.hide();
+                    bindMobileNotify.show();
+            }
+        },
+
+        _onRememberClick: function(e){
+            var userName = document.getElementById('email');
+            //var passWord = document.getElementById('password');
+            var ele = $(e.currentTarget);
+            userName = userName && userName.value;
+            //passWord = passWord && passWord.value;
+            if(ele[0].checked) {
+                    // alert('记者我')
+                K.handyWarn({
+                    msg: '勾选后，系统为你保持登录状态7天，为了信息安全，请不要在公共电脑上勾选此项。',
+                    rel: $('#remeLabel'),
+                    relPos: 'top',
+                    autoClose: 4000
+                });
+                if(userName) {
+                    Cookie.set(complie('userName'), complie(userName));
+                    //passWord && Cookie.set(complie('password'), complie(passWord));
+                }
+            } else {
+                Cookie.set(complie('userName'), '');
+                //Cookie.set(complie('password'), '');
+            }
+
+        },
+
+        _onEmailKeyup:function(e){
+            if(e.which == 13){
+                var $pwd = this.get$('pwd');
+                var $email = this.get$('email');
+                if($email.val().length != 0){
+                    $pwd.focus();
+                }
+            }
+        },
+
+        _onPwdKeyup: function(e){
+            if(e.which == 13){
+                this.$(e.target).blur();
+                this._onLoginBtnClick(e);
+            }
+        },
+
+        _onSendMsgBtnClick: function(){
+            var $btn = $('#sendMsgBtn'), _timeout = null, time = 60, em = $.trim($('#email').val());
+            if( $.trim($('#vcode').val()) === '' ){
+                this._inputWarn($btn,'验证码不能为空');
+                return false;
+            }
+            K.req({
+                url: '/space/c/user/mobile-validate-code/' + em +
+                    '?vcode=' + $.trim($('#vcode').val()) +
+                    '&vcodeId=' + $.trim($('#vcodeId').val()),
+                type: 'GET',
+                data: {
+                },
+                s: function (resp) {
+                    $btn.addClass('gray').val('重新发送("'+ time +'")');
+                    settime();
+                },
+                f: function (resp) {
+                    this._inputWarn($btn, resp.errormsg || '发送失败');
+                    $('#refreshVcode')[0].click();
+                },
+                e: function (resp) {
+                    this._inputWarn($btn,'网络异常');
+                    $('#refreshVcode')[0].click();
+                },
+                scope: this
+            });
+
+            function settime() {
+                _timeout = setTimeout(function() {
+                    settime()
+                },1000);
+                if (time == 0) {
+                    $btn.val("免费获取验证码").removeClass('gray').removeAttr("disabled");
+                    time = 5;
+                    clearTimeout(_timeout);
+                } else {
+                    $btn.val("重新发送(" + time + ")").attr("disabled", 'disabled');
+                    time--;
+                }
+            }
+
+        },
+
+        _onVerifyBtnClick: function(){
+            var me = this;
+            $btn = $('#verifyBtn');
+            K.req({
+                url: '/space/c/user/active_mobile',
+                type: 'POST',
+                data: {
+                    code: $.trim($('#securityCode').val()),
+                    mobile: $.trim($('#email').val()),
+                    password: this._dialog.pwd
+                },
+                s: function (resp) {
+                    // me._onLoginBtnClick();
+                    $('#log-btn').click();
+                },
+                f: function (resp) {
+                    this._inputWarn($btn,'验证失败');
+                },
+                e: function (resp) {
+                    this._inputWarn($btn,'网络异常');
+                },
+                scope: this
+            });
+        },
+
+        _onYoushangBtnClick: function(){
+            var me = this;
+
+            $('#email').val('').attr('placeholder', '请输入友商网账号').css({
+                'padding-left': '20px'
+            });
+            $('#password').val('');
+            $('#jsCountryPanel').hide();
+
+            me.settings.loginType = 'youshang';
+            me.changeLoginType('youshang');
+        },
+
+        _onPhoneBtnClick: function(){
+            var me = this;
+
+            $('#email').val('').attr('placeholder', '请输入手机号').css({
+                'padding-left': '70px'
+            });
+            $('#password').val('');
+            $('#jsCountryPanel').show();
+
+            me.settings.loginType = 'phone';
+            me.changeLoginType('phone');
+        },
+
+        _onEmailBtnClick: function(){
+            var me = this;
+
+            $('#email').val('').attr('placeholder', '请输入邮箱').css({
+                'padding-left': '20px'
+            });
+            $('#password').val('');
+            $('#jsCountryPanel').hide();
+
+            me.settings.loginType = 'email';
+            me.changeLoginType('email');
+        },
+
+        _onSendEmailBtnClick: function(){
+            var $btn = $('#sendEmailBtn'), _timeout = null, time = 60, em = $.trim($('#email').val());
+            K.req({
+                url: '/space/c/user/send-public-mail-verify?email=' + em,
+                type: 'GET',
+                data: {
+                },
+                s: function (resp) {
+                    if(resp.success){
+                        $('.emailVerify .layer-bd').html('<p>系统已发送激活邮件到'+ em +'邮箱，请记得查收。</p><p class="setting"><input type="button" id="sendEmailSuccess" value="确定"></p>');
+                    }else{
+                        this._inputWarn($btn,'发送失败');
+                    }
+                },
+                f: function (resp) {
+                    this._inputWarn($btn,'发送失败');
+                },
+                e: function (resp) {
+                    this._inputWarn($btn,'网络异常');
+                },
+                scope: this
+            });
+        },
+
+        _onSendEmailSuccessClick: function(){
+            $('.emailVerify, .overlay').remove();
+        },
+
+        _onLoginBtnClick: function(e){
+            e.preventDefault();
+
+            var $ = this.$,
+                me = this,
+                timestamp = (new Date()).getTime(),
+                $areaCode = $('.country-panel-code'),
+                areaCode = $areaCode.text(),
+                $email = $('#email'),
+                em = $.trim($email.val()),
+                $pwd = $('#password'),
+                pwd = $.trim($pwd.val()),
+                remember = $('#reme').is(':checked'),
+                $tipsEle = this.get$('loginBtn'),
+                $loginBtn = $('#log-btn');
+
+
+            if($loginBtn.attr('disabled')) return;
+
+            if( me.settings.loginType == 'phone'){
+
+                if(!em){
+                    this._inputWarn($tipsEle, '请输入有效手机号码。');
+                    return false;
+                }
+            } else if( me.settings.loginType == 'youshang' ){
+                if(!em || (!K.String.checkEmail(em) && !K.String.checkMobilePhone(em) && !me.checkYoushang(em))){
+                    this._inputWarn($tipsEle, '请输入有效邮箱地址、手机号码、用户名。');
+                    return false;
+                }
+            } else if( me.settings.loginType == 'email' ){
+                if(!em || (!K.String.checkEmail(em))){
+                    this._inputWarn($tipsEle, '请输入有效邮箱地址。');
+                    return false;
+                }
+            }
+
+            if(!pwd){
+                this._inputWarn($tipsEle, '请输入密码');
+                return false;
+            }
+
+            var redirectUrl = cookie('redirectUrl');
+            if(!redirectUrl){
+            	var queryStr = K.Url.getQueryStr(location.href);
+                redirectUrl = queryStr ? (queryStr.redirectUrl ? queryStr.redirectUrl : '') : '';
+                redirectUrl = decodeURIComponent(redirectUrl);
+                if(redirectUrl.indexOf('&') !== -1){
+                    redirectUrl = redirectUrl.replace(/&/,'?');
+                }
+            }
+
+            $loginBtn.attr('disabled', true).addClass('disabled');
+            // if( remember ){
+            //     Cookie.set(complie('userName'), complie(em));
+            // }
+
+            K.req({
+                url: '/space/c/rest/user/login?' + timestamp,
+                type: 'POST',
+                data: {
+                    email: (me.settings.loginType == 'phone' ? (areaCode + '-' + em) : em).replace('+86-',''),//国内号码不加区号
+                    password: pwd,
+                    remember: remember,
+                    forceToNetwork: false,
+                    redirectUrl: redirectUrl,
+                    accountType: me.settings.loginType == 'youshang' ? 'youshang' : ''
+                },
+                s: function (resp) {
+                    var rdUrl = '/im/xiaoxi/';
+                    if(resp['redirectUrl']){
+                        rdUrl = resp.redirectUrl;
+                    }
+                    if (resp.errorCode*1 === 4) {
+                            $loginBtn.attr('disabled', false).removeClass('disabled');
+                        // if (me.settings.loginType === 'email') {
+                            var emailLoginInfo = {
+                                email: em,
+                                pwd: pwd,
+                                remember: remember,
+                                redirectUrl: redirectUrl
+                            }
+                            if ('sessionStorage' in window) {
+                                sessionStorage.setItem('__email-infos', JSON.stringify(emailLoginInfo));
+                                sessionStorage.setItem('__rd', rdUrl);
+                            }
+                            $('.login-wrap .login-form').hide();
+                            $('.login-content-foot').hide();
+                            $('.login-wrap .bind-mobile-tips').show();
+                        // }
+                    } else {
+                        location.href = rdUrl
+                    }
+                },
+                f: function (resp) {
+                    $loginBtn.attr('disabled', false).removeClass('disabled');
+                    if( me.settings.loginType == 'youshang'){
+                        this._inputWarn($tipsEle,resp['errormsg'] || '用户名或密码错误');
+                        return ;
+                    }
+                    if (resp['errorCode'] == 1) {
+                        me._checkDimission(em);
+                    } else if (resp['errorCode'] == 3) {
+                        this._inputWarn($tipsEle,resp['errormsg'] || '账号尚未激活');
+
+                        var reg = /\d{11}$/g;
+                        if(reg.test(em)){
+                            this._dialog = new K.Dialog({
+                                cls: 'verify',
+                                modal: true,
+                                title: '手机验证',
+                                onClose: function() {
+                                    this.$('.verify, .overlay').remove();
+                                },
+                                width: 482,
+                                scope: this
+                            });
+                            $bd = this._dialog._$body;
+                            $bd.prepend('<p>您的帐号'+ em +'是一个未激活的手机帐号，需要完成验证环节才能正常登录。</p>'
+                                        + '<p class="setting bindmobile-wrapper vcode-wrap"><input type="text" placeholder="请输入图片验证码" id="vcode"><input type="hidden" id="vcodeId" value=""><img class="pic-yzm" src="" id="refreshVcode"></p>'
+                                        + '<p class="setting"><input type="text" id="securityCode" /><input type="button" id="sendMsgBtn" value="免费获取验证码" /></p>'
+                                        + '<p><input type="button" value="验证" id="verifyBtn" /></p>');
+                            this._dialog.pwd = pwd;
+                            this._dialog.open(true);
+                            K.req({
+                                url: '/space/c/user/refreshVCodeImage',
+                                type: 'POST',
+                                data: {mobile: $.trim($('#email').val())},
+                                s: function(resp){
+                                  $('#refreshVcode').attr('src', resp.vcodeImageUrl);
+                                  $('#vcodeId').val(resp.vcodeId);
+                                  $('.vcode-wrap').show();
+                                },
+                                f: function(resp) {
+                                    K.handyError({msg: '更新图形验证码失败', rel: $refreshVcode, relPos: 'top'});
+                                },
+                                scope: this
+                            });
+
+                            $('#refreshVcode').click(function() {
+                                 K.req({
+                                    url: '/space/c/user/refreshVCodeImage',
+                                    type: 'POST',
+                                    data: {mobile: $.trim($('#email').val())},
+                                    s: function(resp){
+                                      $('#refreshVcode').attr('src', resp.vcodeImageUrl);
+                                      $('#vcodeId').val(resp.vcodeId);
+                                      $('.vcode-wrap').show();
+                                    },
+                                    f: function(resp) {
+                                        K.handyError({msg: '更新图形验证码失败', rel: $refreshVcode, relPos: 'top'});
+                                    },
+                                    scope: this
+                                });
+                            });
+                        }else{
+                            this._dialog = new K.Dialog({
+                                cls: 'emailVerify',
+                                modal: true,
+                                title: '帐号激活',
+                                onClose: function() {
+                                    this.$('.verify, .overlay').remove();
+                                },
+                                width: 482,
+                                scope: this
+                            });
+                            $bd = this._dialog._$body;
+                            $bd.prepend('<p>你的帐号'+ em +'尚未激活，激活后才能正常登录，点击“发送激活邮件”，系统将发送激活邮件到你的邮箱。</p><p class="setting"><input type="button" id="sendEmailBtn" value="发送激活邮件" /></p>');
+                            this._dialog.pwd = pwd;
+                            this._dialog.open(true);
+                        }
+                    }else if(resp.error && resp.error.code == "ip_security_exception"){
+                        this._inputWarn($tipsEle,'你当前所处的网络地址已被公司管理员设置为禁止登录，请更换网络后重试。');
+                    }else if(resp.errorType == "noJoinNetwork"){
+                        location.href="/space/c/team/login-no-join-network";
+                    }else {
+                        this._inputWarn($tipsEle,resp['errormsg'] || '邮箱或密码错误');
+                    }
+                },
+                e: function (resp) {
+                    $loginBtn.attr('disabled', false).removeClass('disabled');
+                    if (resp.errorType == "noJoinNetwork") {location.href="/space/c/team/login-no-join-network";}
+                    this._inputWarn($tipsEle,'网络异常');
+                },
+                scope: this
+            });
+            return false;
+        },
+
+        _inputWarn: function($ele,message){
+            var me = this;
+            // $('#warn-tips').text(message).css('display', 'block');
+            K.handyWarn({
+                msg: message,
+                rel: $ele,
+                relPos: 'top'
+            });
+        },
+
+        _checkDimission: function(email) {
+            var me = this;
+            K.req({
+                url: '/space/c/rest/user/get-user-seq',
+                type: 'POST',
+                data: {email: email},
+                s: function (resp) {
+                    if(resp.emailBindUser && resp.emailBindUser[0] && resp.emailBindUser[0].userSeq) {
+                        S.cloudAccountLoginDialog.open({
+                            cloudAccount: resp.emailBindUser[0].userSeq,
+                            userName: resp.emailBindUser[0].userName,
+                            accountName: resp.emailBindUser[0].accountName,
+                            networkName: resp.emailBindUser[0].networkName,
+                            onSubmit: function() {
+                                me._cloudAccountDialogLogin();
+                            }
+                        });
+                    }else {
+                        S.ToSignUpDialog.open();
+                    }
+                    __console.warn(resp);
+                },
+                f: function (resp) {
+                    __console.warn(resp);
+                },
+                e: function (resp) {
+                    __console.warn(resp);
+                },
+                scope: this
+            });
+        },
+
+        _cloudAccountDialogLogin: function() {
+            var $ = this.$,
+                $cloudAccount = $('#cloud-account'),
+                cloudNum = $cloudAccount.val(),
+                $pwd = $('#cloud-password'),
+                pwd = $pwd.val();
+            submitBtn = $('.cloud-account-login');
+
+            if(!cloudNum || !K.String.checkCloudAccount(cloudNum)) {
+                this._inputWarn($cloudAccount, '请输入六位数字的云号');
+                return false;
+            }
+            if(!pwd) {
+                this._inputWarn($pwd, '请输入密码');
+                return false;
+            }
+
+            K.req({
+                url: '/space/c/rest/user/login',
+                type: 'POST',
+                data: {
+                    email: cloudNum,
+                    password: pwd,
+                    remember: true,
+                    accountType: '',
+                    accountName: '',
+                    networkId: '',
+                    redirectUrl: '/microblog',
+                    forceToNetwork: false
+                },
+                s: function (resp) {
+                    if(resp['redirectUrl']){
+                        location.href = resp.redirectUrl;
+                    }else{
+                        location.href = redirectUrl ? redirectUrl : '/';
+                    }
+                },
+                f: function (resp) {
+                    this._inputWarn(submitBtn, resp['errormsg'] || '邮箱或密码错误');
+                },
+                e: function (resp) {
+                    if (resp.errorType == "noJoinNetwork") {location.href="/space/c/team/login-no-join-network";}
+                    this._inputWarn(submitBtn, '网络异常');
+                },
+                scope: this
+            });
+            return false;
+        },
+
+        checkYoushang: function(msg){
+            return (!(/%<>&"'/.test(msg)) && msg.length <= 40);
+        }
+    };
+
+
+}());
+
+/*已离职，使用云号登陆弹框*/
+S.cloudAccountLoginDialog = {
+	_dialog: null,
+	$: jQuery,
+
+	init: function(cfg) {
+		var me = this;
+		this._dialog = new K.Dialog({
+			cls: 'cloud-accout-login-dialog',
+			title: '账号失效',
+			modal: true,
+			body: me.tpl(),
+			highZindex: true
+		});
+	},
+
+	tpl: function() {
+		var t = new K.SimpleTemplate();
+
+		t._('<h1><span class="user-name"></span>，您好！</h1>')
+		._('<p class="notice">您已退出“<span class="network-name"></span>”，您的企业邮箱 <span class="account-name"></span> 已失效，请使用您的云号登陆！</p>')
+		._('<p><input type="text" name="cloud-account" id="cloud-account" placeholder="云号"/></p>')
+		._('<p><input type="password" name="cloud-password" id="cloud-password" placeholder="密码"/></p>')
+		._('<p><a class="cloud-account-login"></a></p>');
+
+		return t.toString();
+	},
+
+	_autoInitForm: function(cfg) {
+		this._dialog.getBody$().find('#cloud-account').val(cfg.cloudAccount);
+		this._dialog.getBody$().find('.user-name').text(cfg.userName);
+		this._dialog.getBody$().find('.network-name').text(cfg.networkName);
+		this._dialog.getBody$().find('.account-name').text(cfg.accountName);
+	},
+
+	_bindLoginBtn: function(cfg) {
+		var me = this,
+			$root = this._dialog.getBody$();
+		$root.delegate('.cloud-account-login', 'click', function() {
+			console.warn('123');
+			cfg.onSubmit.call(me);
+		});
+	},
+
+	open: function(cfg){
+		if(!this._dialog) {
+			this.init(cfg);
+		}
+		this._autoInitForm(cfg);
+		this._bindLoginBtn(cfg);
+		this._dialog.open(true);
+		this._dialog.getBody$().find('#cloud-password').focus();
+	},
+
+	close: function() {
+		this._dialog.close(true);
+	}
+};
+
+/**
+ * 账号输入错误后引导注册
+ */
+S.ToSignUpDialog = {
+	$: jQuery,
+	dialog: null,
+
+	init: function() {
+		this.dialog = new K.Dialog({
+			modal: true,
+			cls: 'to-signup-dialog',
+			title: '登录提示',
+			body: this.tpl(),
+			onClose: function () {
+				$(document).click();
+			}
+		});
+	},
+
+	open: function() {
+		this.init();
+		this.dialog.open();
+
+		this.eventHandler();
+	},
+
+	close: function(destroy) {
+		if(this.dialog) {
+			this.dialog.close(destroy);
+		}
+	},
+
+	tpl: function(data) {
+		var t = new K.SimpleTemplate();
+		t._('<p>找不到该账户，你是否想要创建一个新账户？</p>')
+		 ._('<p class="ctrl"><a href="javascript:void(0);" class="btn btn-blue btn-to-signup-ok"><em>去创建</em></a><a href="javascript:void(0);" class="btn btn-blue btn-to-signup-no"><em>再试一次</em></a></p>')
+
+		return t.toString();
+	},
+
+	eventHandler: function() {
+		var me = this,
+			$root = this.dialog.getBody$();
+
+		$root.delegate('.btn-to-signup-no', 'click', function() {
+			S.ToSignUpDialog .close();
+			$('#email').get(0).select();
+		});
+        $root.delegate('.btn-to-signup-ok', 'click', function() {
+            S.ToSignUpDialog .close();
+            $('.headSignUp')[0].click();
+        });
+	}
+};
+
+S.run('Login');

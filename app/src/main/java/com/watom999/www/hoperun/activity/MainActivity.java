@@ -1,5 +1,8 @@
 package com.watom999.www.hoperun.activity;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -37,16 +40,25 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ashokvarma.bottomnavigation.BottomNavigationBar;
+import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.watom999.www.hoperun.R;
 import com.watom999.www.hoperun.data.MySQLiteHelper;
 import com.watom999.www.hoperun.entity.UserInfoEntity;
+import com.watom999.www.hoperun.fragment.Fragment00;
+import com.watom999.www.hoperun.fragment.Fragment01;
+import com.watom999.www.hoperun.fragment.Fragment02;
+import com.watom999.www.hoperun.fragment.Fragment03;
+import com.watom999.www.hoperun.fragment.Fragment04;
+import com.watom999.www.hoperun.utils.Logout;
 import com.watom999.www.hoperun.utils.MyToast;
+import com.watom999.www.hoperun.utils.WebViewTool;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, BottomNavigationBar.OnTabSelectedListener {
     WebView webView01;
     WebSettings webSettings;
     MySQLiteHelper mySQLiteHelper;
@@ -58,6 +70,16 @@ public class MainActivity extends AppCompatActivity
     private UserInfoEntity userInfoEntity;
     private long insert;
     private PackageManager packageManager;
+    DrawerLayout drawer;
+    Toolbar toolbar;
+    NavigationView navigationView;
+    BottomNavigationBar bottomNavigationBar;
+    Fragment currentFragment;
+    Fragment00 fragment00;
+    Fragment01 fragment01;
+    Fragment02 fragment02;
+    Fragment03 fragment03;
+    Fragment04 fragment04;
 
     private Handler handler = new Handler() {
         @Override
@@ -93,11 +115,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         context = this;
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        webView01 = (WebView) findViewById(R.id.where_webview);
+        findView();
         setSupportActionBar(toolbar);
-
-        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -107,89 +126,106 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
         //------------------------------------
         //initWebView("http://elec.hoperun.com:8106/eoffice_pc/");//在线地址
-        initWebView("file:///android_asset/kaoqin01.html");//本地地址:
+//        new WebViewTool(this).initWebView(webView01, "file:///android_asset/kaoqin01.html");//本地地址:
         page_type = "0";
         //------------------------------------
-
         TextView timeView = (TextView) findViewById(R.id.time);
-//        Date date = DateUtil.getDate(new Date());
-//        String myDate = "";
-//        if (!(date == null)) {
-//            myDate= DateUtil.format(date);
-//        }
+        //Date date = DateUtil.getDate(new Date());
+        //String myDate = "";
+        //if (!(date == null)) {
+        //    myDate= DateUtil.format(date);
+        //}
         mySQLiteHelper = new MySQLiteHelper(context);
     }
 
-    /**
-     * 安卓原生代码
-     */
-    private void initWebView(String url) {
-        // 加载网页 H5,html,自定义浏览器，或者网页播放器
-        // webView01 = new WebView(this);
-        // 设置WebSettings支持javascript
-        webSettings = webView01.getSettings();
-        //在本地浏览器的页面里面有页面时，也会调用webview，不会调用手机浏览器
-        webView01.setWebViewClient(new WebViewClient());
-        //设置为可调用js方法
-        webSettings.setJavaScriptEnabled(true);
-        //不调用浏览器 而调用自己的内部的浏览器
-        webView01.setWebViewClient(new WebViewClient() {
-            /**
-             * 当一个新的url即将加载到当前的WebView中时，给主机应用程序一个接管控件的机会。
-             * @param view
-             * @param request
-             * @return
-             */
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                //当前的路径穿进去处理
-                return super.shouldOverrideUrlLoading(view, request);
-            }
-        });
-        //加载网络上的HTML文件
-        webView01.loadUrl(url);
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        //自适应屏幕
-        webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-
-        webSettings.setDisplayZoomControls(false);
-        webSettings.setAllowFileAccess(true); // 允许访问文件
-        webSettings.setBuiltInZoomControls(true); // 设置显示缩放按钮
-        webSettings.setSupportZoom(true); // 支持缩放
-        webSettings.setUseWideViewPort(true);//扩大比例的缩放
-        //将提供的Java对象注入到此WebView中。可以让JS通过android的这个字段调用这个java对象中的方法
-        webView01.addJavascriptInterface(new androidLoginInterface(), "Android");
-
-        /**
-         * 用WebView显示图片，可使用这个参数 设置网页布局类型：
-         *  1、LayoutAlgorithm.NARROW_COLUMNS ： 适应内容大小
-         *  2、LayoutAlgorithm.SINGLE_COLUMN:适应屏幕，内容将自动缩放
-         */
-//        webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
-        webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-        webSettings.setLoadWithOverviewMode(true);
+    private void findView() {
+        toolbar = findViewById(R.id.toolbar);
+        fab = findViewById(R.id.fab);
+        initFragment();
+//        webView01 = findViewById(R.id.where_webview);
+        drawer = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
+        bottomNavigationBar = findViewById(R.id.bottom_navigation_bar);
+        bottomNavigationBar.setMode(BottomNavigationBar.MODE_FIXED);
+        bottomNavigationBar.setBackgroundStyle(BottomNavigationBar.BACKGROUND_STYLE_RIPPLE);
+        bottomNavigationBar
+                .setActiveColor(R.color.newcolor_shenhui01)
+                .setInActiveColor(R.color.newcolor_shenlv)
+                .setBarBackgroundColor("#3F51B5");
+        bottomNavigationBar.addItem(new BottomNavigationItem(R.mipmap.fx_none2x, "云家"))
+                .addItem(new BottomNavigationItem(R.mipmap.yd_none2x, "邮箱"))
+                .addItem(new BottomNavigationItem(R.mipmap.sy_none2x, "考勤"))
+                .addItem(new BottomNavigationItem(R.mipmap.wd_none2x, "钉钉"))
+                .addItem(new BottomNavigationItem(R.mipmap.kf_none2x, "EHR"))
+                .setFirstSelectedPosition(2)
+                .initialise();
+        bottomNavigationBar.setTabSelectedListener(this);
     }
 
+    private void initFragment() {
+        fragment00 = new Fragment00();
+        fragment01 = new Fragment01();
+        fragment02 = new Fragment02();
+        fragment03 = new Fragment03();
+        fragment04 = new Fragment04();
+        currentFragment=fragment02;
+        getFragmentManager().beginTransaction().add(R.id.frame_layout, currentFragment).commit();
+    }
 
-    class androidLoginInterface {
-        @JavascriptInterface  //这里的JavascriptInterface注解很重要
-        public void showToast() {
-            Toast.makeText(MainActivity.this, "js调用安卓代码", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(MainActivity.this, UserInfoQuery.class);
-            startActivity(intent);
+    @Override
+    public void onTabSelected(int position) {
+        switch (position) {
+            case 0:
+                switchFragment(fragment00);
+                break;
+            case 1:
+                switchFragment(fragment01);
+                break;
+            case 2:
+                switchFragment(fragment02);
+                break;
+            case 3:
+                switchFragment(fragment03);
+                break;
+            case 4:
+                switchFragment(fragment04);
+                break;
         }
+    }
+
+    @Override
+    public void onTabUnselected(int position) {
+    }
+
+    @Override
+    public void onTabReselected(int position) {
+    }
+
+    private void switchFragment(Fragment fragment) {
+        //判断当前显示的Fragment是不是切换的Fragment
+        if (currentFragment != fragment) {
+            //判断切换的Fragment是否已经添加过
+            if (!fragment.isAdded()) {
+                //如果没有，则先把当前的Fragment隐藏，把切换的Fragment添加上
+                getFragmentManager().beginTransaction().hide(currentFragment)
+                        .add(R.id.frame_layout, fragment).commit();
+            } else {
+                //如果已经添加过，则先把当前的Fragment隐藏，把切换的Fragment显示出来
+                getFragmentManager().beginTransaction().hide(currentFragment).show(fragment).commit();
+            }
+            currentFragment = fragment;
+
+        }
+
     }
 
     @Override
@@ -199,7 +235,7 @@ public class MainActivity extends AppCompatActivity
         //但是注意：webview调用destory时,webview仍绑定在Activity上
         //这是由于自定义webview构建时传入了该Activity的context对象
         //因此需要先从父容器中移除webview,然后再销毁webview:
-//        rootLayout.removeView(webView);
+        //rootLayout.removeView(webView);
         webView01.destroy();
         finish();
         super.onDestroy();
@@ -249,24 +285,23 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
         if (id == R.id.nav_ehr) {
-            initWebView("http://ehr.hoperun.com:8018/HRIS/Portal/Home.do#nv_1");
+            new WebViewTool(this).initWebView(webView01, "http://ehr.hoperun.com:8018/HRIS/Portal/Home.do#nv_1");
             fab.hide();
-//            initWebView("file:///android_asset/系统登录.htm");
+//            new WebViewTool(this).initWebView(webView01,"file:///android_asset/系统登录.htm");
             page_type = "1";
         } else if (id == R.id.nav_gallery) {
-            initWebView("http://mail.hoperun.com/");
+            new WebViewTool(this).initWebView(webView01, "http://mail.hoperun.com/");
             fab.hide();
-//            initWebView("file:///android_asset/263企业邮箱-登录入口.htm");
+//            new WebViewTool(this).initWebView(webView01,"file:///android_asset/263企业邮箱-登录入口.htm");
             page_type = "2";
         } else if (id == R.id.nav_slideshow) {
-//            initWebView("https://www.yunzhijia.com/home/?m=open&a=login");
-//            initWebView("file:///android_asset/金蝶云之家帐号在线登录-云之家官网.htm");
-            openLocalApp("com.kdweibo.client", "云之家");  //打开钉钉
+//            new WebViewTool(this).initWebView(webView01,"https://www.yunzhijia.com/home/?m=open&a=login");
+//            new WebViewTool(this).initWebView(webView01,"file:///android_asset/金蝶云之家帐号在线登录-云之家官网.htm");
+            new WebViewTool(this).openLocalApp("com.kdweibo.client", "云之家");
             page_type = "3";
         } else if (id == R.id.nav_bigevent) {
-            openLocalApp("com.alibaba.android.rimet", "钉钉");  //打开钉钉
+            new WebViewTool(this).openLocalApp("com.alibaba.android.rimet", "钉钉");  //打开钉钉
         } else if (id == R.id.nav_manage) {
             startActivity(new Intent(this, TimingLaunchActivity.class));
         } else if (id == R.id.nav_share) {
@@ -280,68 +315,58 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void openLocalApp(String packageName, String appName) {
-        packageManager = getPackageManager();
-        if (checkPackInfo(packageName)) {//检查是否有要打开的app
-            Intent intent = packageManager.getLaunchIntentForPackage(packageName);
-            if (packageName.equals("com.alibaba.android.rimet")) {
-                //打开钉钉考勤界面
-            }
-            startActivity(intent);
-        } else {
-            MyToast.showToast(this, "手机未安装" + appName + "软件，正前往手机市场...");
-            launchAppMarket(packageName, appName);//跳转到应用市场
-        }
-    }
-
-    private void launchAppMarket(String packageName, String appName) {
-        String model = Build.MODEL;
-        String appmarket = null;
-        if (model.contains("huawei")) {
-            appmarket = "com.huawei.appmarket";
-        } else if (model.contains("xiaomi")) {
-            appmarket = "com.xiaomi.market";
-        } else {
-            MyToast.showToast(this, "请在应用市场上下载" + appName);
-            return;
-        }
-        try {
-            if (TextUtils.isEmpty(packageName)) return;
-
-            Uri uri = Uri.parse("market://details?id=" + packageName);
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            if (!TextUtils.isEmpty(appmarket)) {
-                intent.setPackage(appmarket);
-            }
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 检查包是否存在。
-     *
-     * @param packageName
-     * @return
-     */
-    private boolean checkPackInfo(String packageName) {
-        PackageInfo packageInfo = null;
-        try {
-            packageInfo = getPackageManager().getPackageInfo(packageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return packageInfo != null;
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        String message = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? "屏幕设置为：横屏" : "屏幕设置为：竖屏";
-        MyToast.showToast(this, message);
-    }
+//    private void openLocalApp(String packageName, String appName) {
+//        packageManager = getPackageManager();
+//        if (checkPackInfo(packageName)) {//检查是否有要打开的app
+//            Intent intent = packageManager.getLaunchIntentForPackage(packageName);
+//            if (packageName.equals("com.alibaba.android.rimet")) {
+//                //打开钉钉考勤界面
+//            }
+//            startActivity(intent);
+//        } else {
+//            MyToast.showToast(this, "手机未安装" + appName + "软件，正前往手机市场...");
+//            launchAppMarket(packageName, appName);//跳转到应用市场
+//        }
+//    }
+//
+//    private void launchAppMarket(String packageName, String appName) {
+//        String model = Build.MODEL;
+//        String appmarket = null;
+//        if (model.contains("huawei")) {
+//            appmarket = "com.huawei.appmarket";
+//        } else if (model.contains("xiaomi")) {
+//            appmarket = "com.xiaomi.market";
+//        } else {
+//            MyToast.showToast(this, "请在应用市场上下载" + appName);
+//            return;
+//        }
+//        try {
+//            if (TextUtils.isEmpty(packageName)) return;
+//
+//            Uri uri = Uri.parse("market://details?id=" + packageName);
+//            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+//            if (!TextUtils.isEmpty(appmarket)) {
+//                intent.setPackage(appmarket);
+//            }
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            startActivity(intent);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    /**
+//     * 检查包是否存在。
+//     */
+//    private boolean checkPackInfo(String packageName) {
+//        PackageInfo packageInfo = null;
+//        try {
+//            packageInfo = getPackageManager().getPackageInfo(packageName, 0);
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        return packageInfo != null;
+//    }
 
     /**
      * 登录入口http://elec.hoperun.com:8106/eoffice_pc/attendance/initPage
@@ -515,14 +540,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
 //        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {}
-            String currentUrl = webView01.getUrl();
-            Boolean equalStr = !isEqualStr(currentUrl, "file:///android_asset/kaoqin01.html");
-            if (currentUrl != null && equalStr) {
-                initWebView("file:///android_asset/kaoqin01.html");//本地考勤地址
-                fab.show();
-                return false;
-            }else {
-                return super.onKeyUp(keyCode, event);
-            }
+        String currentUrl = webView01.getUrl();
+        Boolean equalStr = !isEqualStr(currentUrl, "file:///android_asset/kaoqin01.html");
+        if (currentUrl != null && equalStr) {
+            new WebViewTool(this).initWebView(webView01, "file:///android_asset/kaoqin01.html");//本地考勤地址
+            fab.show();
+            return false;
+        } else {
+            return super.onKeyUp(keyCode, event);
+        }
     }
 }

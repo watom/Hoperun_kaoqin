@@ -36,7 +36,14 @@
         <activity android:name=".activity.AboutUSActivity"  />
         <activity android:name=".activity.SetTimeActivity"  />
         <activity android:name=".activity.TimingLaunchActivity"  />
-        <receiver android:name=".MyReceiver" android:process=":newinst"/>
-        <receiver android:name=".broadcast_receiver.AlarmReceiver" android:process=":remote" />
+        <receiver
+            android:name=".broadcast_receiver.AlarmReceiver"
+            android:enabled="true"
+            android:exported="true"
+            >
+            <intent-filter>
+                <action android:name="pw.msdx.ACTION_SEND"/>
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

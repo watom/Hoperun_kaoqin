@@ -28,7 +28,7 @@
 
                 <TextView
                     style="@style/eleApply_secNav_text_style"
-                    android:text="考情"
+                    android:text="润和考勤"
                     android:textStyle="bold" />
 
                 <View style="@style/mStyle_spilt1" />
@@ -43,12 +43,13 @@
                         android:layout_height="wrap_content"
                         android:text="账号" />
 
-                    <TextView
+                    <EditText
                         android:id="@+id/account01"
                         style="@style/eleApply_edittext_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:enabled="false"
                         android:text="--" />
                 </LinearLayout>
 
@@ -64,24 +65,23 @@
                         android:layout_height="wrap_content"
                         android:text="密码" />
 
-                    <TextView
+                    <EditText
                         android:id="@+id/password01"
                         style="@style/eleApply_edittext_style"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:enabled="false"
                         android:text="--" />
                 </LinearLayout>
             </LinearLayout>
-
-            <View style="@style/mStyle_spilt1" />
 
             <LinearLayout
                 android:id="@+id/erp_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="invisible">
+                android:visibility="gone">
 
                 <TextView
                     style="@style/eleApply_secNav_text_style"
@@ -131,14 +131,12 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <View style="@style/mStyle_spilt1" />
-
             <LinearLayout
                 android:id="@+id/email_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="invisible">
+                android:visibility="gone">
 
                 <TextView
                     style="@style/eleApply_secNav_text_style"
@@ -188,14 +186,12 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <View style="@style/mStyle_spilt1" />
-
             <LinearLayout
                 android:id="@+id/yunzhijia_ll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="invisible">
+                android:visibility="gone">
 
                 <TextView
                     style="@style/eleApply_secNav_text_style"
@@ -244,8 +240,6 @@
                         android:text="--" />
                 </LinearLayout>
             </LinearLayout>
-
-            <View style="@style/mStyle_spilt1" />
 
             <Button
                 android:id="@+id/btn_call_detaile"

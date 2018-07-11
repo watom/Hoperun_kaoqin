@@ -23,7 +23,7 @@ import cn.sharesdk.onekeyshare.OnekeyShare;
  */
 
 public class ShareAppActivity extends AppCompatActivity {
-    String urlStr="https://fir.im/d1lw";
+    String urlStr="https://fir.im/xlz5";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

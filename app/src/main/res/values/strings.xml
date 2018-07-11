@@ -5,10 +5,10 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings_0">登陆信息</string>
-    <string name="action_settings_1">查看登陆信息</string>
-    <string name="action_settings_2">修改/清除信息</string>
+    <string name="action_settings_1">查询登陆信息</string>
+    <string name="action_settings_2">清空信息</string>
     <string name="action_settings_3">定时提醒</string>
-    <string name="action_settings_4">自动打卡</string>
-    <string name="action_settings_5">注销/退出</string>
+    <string name="action_settings_4">分享App</string>
+    <string name="action_settings_5">退出</string>
     <string name="action_settings_6">登 陆</string>
 </resources>

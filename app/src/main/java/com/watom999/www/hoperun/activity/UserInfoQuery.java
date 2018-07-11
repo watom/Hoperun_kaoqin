@@ -4,8 +4,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -13,6 +15,7 @@ import com.watom999.www.hoperun.ETitleBar;
 import com.watom999.www.hoperun.R;
 import com.watom999.www.hoperun.data.DataBaseHelp;
 import com.watom999.www.hoperun.data.MySQLiteHelper;
+import com.watom999.www.hoperun.utils.MyToast;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,8 +32,8 @@ import java.util.Map;
 
 public class UserInfoQuery extends AppCompatActivity implements View.OnClickListener {
     private ETitleBar titlebar;
-    private TextView account01;
-    private TextView password01;
+    private EditText account01;
+    private EditText password01;
     private LinearLayout erpLl;
     private TextView account02;
     private TextView password02;
@@ -42,16 +45,30 @@ public class UserInfoQuery extends AppCompatActivity implements View.OnClickList
     private TextView password04;
     private Button btnCallDetaile;
     private MySQLiteHelper mySQLiteHelper;
+    private String buttonText;
+    private Map<String, Object> userLoginInfo;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.userinfo_query_layout);
         getSupportActionBar().hide();  //去掉标题栏
+        findViews();
+        mySQLiteHelper = new MySQLiteHelper(this);
+
+        userLoginInfo = getUserLoginInfo("0");
+        initView(userLoginInfo);
+    }
+
+    private void initView(Map<String, Object> userLoginInfo) {
         titlebar.setTitle("登录信息");
         titlebar.setTitleRightIconVisible(true);
-        setContentView(R.layout.userinfo_query_layout);
-        mySQLiteHelper = new MySQLiteHelper(this);
-        findViews();
+        if (userLoginInfo != null && userLoginInfo.size() != 0) {
+            account01.setText((String) userLoginInfo.get("login_account"));
+            password01.setText((String) userLoginInfo.get("login_password"));
+        } else {
+            MyToast.showToast(this, "请先在主页登录");
+        }
     }
 
     /**
@@ -61,38 +78,57 @@ public class UserInfoQuery extends AppCompatActivity implements View.OnClickList
         HashMap<String, Object> userLoginInfo = mySQLiteHelper.getUserLoginInfo(pageid);
         return userLoginInfo;
     }
-        private void findViews() {
-            titlebar = (ETitleBar)findViewById( R.id.titlebar );
-            account01 = (TextView)findViewById( R.id.account01 );
-            password01 = (TextView)findViewById( R.id.password01 );
-            erpLl = (LinearLayout)findViewById( R.id.erp_ll );
-            account02 = (TextView)findViewById( R.id.account02 );
-            password02 = (TextView)findViewById( R.id.password02 );
-            emailLl = (LinearLayout)findViewById( R.id.email_ll );
-            account03 = (TextView)findViewById( R.id.account03 );
-            password03 = (TextView)findViewById( R.id.password03 );
-            yunzhijiaLl = (LinearLayout)findViewById( R.id.yunzhijia_ll );
-            account04 = (TextView)findViewById( R.id.account04 );
-            password04 = (TextView)findViewById( R.id.password04 );
-            btnCallDetaile = (Button)findViewById( R.id.btn_call_detaile );
 
-            btnCallDetaile.setOnClickListener( this );
-        }
-
-        @Override
-        public void onClick(View v) {
-            if ( v == btnCallDetaile ) {
-            //修改账号密码
-//            mySQLiteHelper.alter(pageid, account, password);
-            }
-        }
-
-
-    private void insert() {
-//        DataBaseHelp dataBaseHelp = new DataBaseHelp(UserInfoQuery.this);
-//        dataBaseHelp.insert("person", new String[]{"name", "accout"}, new String[]{"zhangsan", "jaj"});
+    private void findViews() {
+        titlebar = (ETitleBar) this.findViewById(R.id.titlebar);
+        account01 = (EditText) this.findViewById(R.id.account01);
+        password01 = (EditText) this.findViewById(R.id.password01);
+        erpLl = (LinearLayout) this.findViewById(R.id.erp_ll);
+        account02 = (TextView) this.findViewById(R.id.account02);
+        password02 = (TextView) this.findViewById(R.id.password02);
+        emailLl = (LinearLayout) this.findViewById(R.id.email_ll);
+        account03 = (TextView) this.findViewById(R.id.account03);
+        password03 = (TextView) this.findViewById(R.id.password03);
+        yunzhijiaLl = (LinearLayout) this.findViewById(R.id.yunzhijia_ll);
+        account04 = (TextView) this.findViewById(R.id.account04);
+        password04 = (TextView) this.findViewById(R.id.password04);
+        btnCallDetaile = (Button) this.findViewById(R.id.btn_call_detaile);
+        buttonText = (String) btnCallDetaile.getText();
+        btnCallDetaile.setOnClickListener(this);
     }
 
-    private void query() {
+    @Override
+    public void onClick(View v) {
+        if (v == btnCallDetaile) {
+            if (userLoginInfo != null && userLoginInfo.size() != 0) {
+                switchText();
+            } else {
+                MyToast.showToast(this, "请先在主页登录");
+            }
+        }
+    }
+
+    private void switchText() {
+        if (buttonText.equals("编辑")) {
+            buttonText = "保存";
+            btnCallDetaile.setText("保存");
+            btnCallDetaile.setBackgroundResource(R.color.btn_gray);
+            account01.setEnabled(true);
+            password01.setEnabled(true);
+        } else {
+            buttonText = "编辑";
+            btnCallDetaile.setText("编辑");
+            btnCallDetaile.setBackgroundResource(R.color.blue);
+            saveInfoData();
+            account01.setEnabled(false);
+            password01.setEnabled(false);
+        }
+    }
+
+    private void saveInfoData() {
+        String account = account01.getText().toString();
+        String password = password01.getText().toString();
+        mySQLiteHelper.alter("0", account, password);//可以修改账号密码
+        MyToast.showToast(this, "修改完成");
     }
 }

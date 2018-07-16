@@ -15,7 +15,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.watom999.www.hoperun.activity.MainActivity;
 import com.watom999.www.hoperun.activity.UserInfoQuery;
 
 /**
@@ -89,13 +88,12 @@ public class WebViewTool {
     public void openLocalApp(String packageName, String appName) {
         packageManager = context.getPackageManager();
         if (checkPackInfo(packageName)) {//检查是否有要打开的app
-//            Intent intent = packageManager.getLaunchIntentForPackage(packageName);
-//            if (packageName.equals("com.alibaba.android.rimet")) {
-//                //打开钉钉考勤界面
-//            }
-//            context.startActivity(intent);
-            Intent intent = new Intent();
-            intent.setClassName("com.alibaba.android.rimet", "com.alibaba.android.rimet.lightapp.runtime.activity.CommonWebViewActivity");
+            Intent intent = packageManager.getLaunchIntentForPackage(packageName);
+            if (packageName.equals("com.alibaba.android.rimet")) {
+                //打开钉钉考勤界面
+            }
+//            Intent intent = new Intent();
+//            intent.setClassName("com.alibaba.android.rimet", "com.alibaba.android.rimet.lightapp.runtime.activity.CommonWebViewActivity");
             context.startActivity(intent);
         } else {
             MyToast.showToast(context, "手机未安装" + appName + "软件，正前往手机市场...");

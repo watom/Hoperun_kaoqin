@@ -550,4 +550,10 @@ public class MainActivity extends AppCompatActivity
             return super.onKeyUp(keyCode, event);
         }
     }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 }

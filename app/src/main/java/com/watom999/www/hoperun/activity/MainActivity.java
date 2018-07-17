@@ -37,6 +37,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -120,9 +121,26 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                login(page_type);//判断是否是第一次登陆，如果是第一次登陆，弹出Dialog，如果不是弹出登陆账号列表
-                Snackbar.make(view, "登陆信息已填入，请点击表单上的登录按钮", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                login(page_type);//判断是否是第一次登陆，如果是第一次登陆，弹出Dialog，如果不是弹出登陆账号列表
+//                Snackbar.make(view, "登陆信息已填入，请点击表单上的登录按钮", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                switch (currentFragment.getTag()) {
+                    case "fragment00":
+
+                        break;
+                    case "fragment01":
+
+                        break;
+                    case "fragment02":
+                        login("0");
+                        break;
+                    case "fragment03":
+
+                        break;
+                    case "fragment04":
+
+                        break;
+                }
             }
         });
 
@@ -177,12 +195,13 @@ public class MainActivity extends AppCompatActivity
         fragment02 = new Fragment02();
         fragment03 = new Fragment03();
         fragment04 = new Fragment04();
-        currentFragment=fragment02;
-        getFragmentManager().beginTransaction().add(R.id.frame_layout, currentFragment).commit();
+        currentFragment = fragment02;
+        getFragmentManager().beginTransaction().add(R.id.frame_layout, currentFragment, "fragment02").commit();
     }
 
     @Override
     public void onTabSelected(int position) {
+        Logout.e("1onTabSelected");
         switch (position) {
             case 0:
                 switchFragment(fragment00);
@@ -217,15 +236,13 @@ public class MainActivity extends AppCompatActivity
             if (!fragment.isAdded()) {
                 //如果没有，则先把当前的Fragment隐藏，把切换的Fragment添加上
                 getFragmentManager().beginTransaction().hide(currentFragment)
-                        .add(R.id.frame_layout, fragment).commit();
+                        .add(R.id.frame_layout, fragment, fragment.getClass().getSimpleName()).commit();
             } else {
                 //如果已经添加过，则先把当前的Fragment隐藏，把切换的Fragment显示出来
                 getFragmentManager().beginTransaction().hide(currentFragment).show(fragment).commit();
             }
             currentFragment = fragment;
-
         }
-
     }
 
     @Override
@@ -315,58 +332,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-//    private void openLocalApp(String packageName, String appName) {
-//        packageManager = getPackageManager();
-//        if (checkPackInfo(packageName)) {//检查是否有要打开的app
-//            Intent intent = packageManager.getLaunchIntentForPackage(packageName);
-//            if (packageName.equals("com.alibaba.android.rimet")) {
-//                //打开钉钉考勤界面
-//            }
-//            startActivity(intent);
-//        } else {
-//            MyToast.showToast(this, "手机未安装" + appName + "软件，正前往手机市场...");
-//            launchAppMarket(packageName, appName);//跳转到应用市场
-//        }
-//    }
-//
-//    private void launchAppMarket(String packageName, String appName) {
-//        String model = Build.MODEL;
-//        String appmarket = null;
-//        if (model.contains("huawei")) {
-//            appmarket = "com.huawei.appmarket";
-//        } else if (model.contains("xiaomi")) {
-//            appmarket = "com.xiaomi.market";
-//        } else {
-//            MyToast.showToast(this, "请在应用市场上下载" + appName);
-//            return;
-//        }
-//        try {
-//            if (TextUtils.isEmpty(packageName)) return;
-//
-//            Uri uri = Uri.parse("market://details?id=" + packageName);
-//            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-//            if (!TextUtils.isEmpty(appmarket)) {
-//                intent.setPackage(appmarket);
-//            }
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            startActivity(intent);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    /**
-//     * 检查包是否存在。
-//     */
-//    private boolean checkPackInfo(String packageName) {
-//        PackageInfo packageInfo = null;
-//        try {
-//            packageInfo = getPackageManager().getPackageInfo(packageName, 0);
-//        } catch (PackageManager.NameNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        return packageInfo != null;
-//    }
 
     /**
      * 登录入口http://elec.hoperun.com:8106/eoffice_pc/attendance/initPage
@@ -402,7 +367,7 @@ public class MainActivity extends AppCompatActivity
             dialogFirstLogin(whichpage, pageFlag);
         } else {
             //非第一次/非重新登陆，判断是登录的是哪个页面，根据页面提取账号密码，直接登录。
-            login(pageFlag, account, password);
+            dispatchData(fragment02, account, password);
         }
     }
 
@@ -425,11 +390,11 @@ public class MainActivity extends AppCompatActivity
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        //保存密码并登陆
+                        //登陆并保存密码
                         String account = accountEditText.getText().toString().trim();
                         String password = passwordEditText.getText().toString().trim();
-                        login(pageFlag, account, password);
-                        saveLoginInfo(pageFlag, account, password);
+                        dispatchData(fragment02, account, password);
+//                        saveLoginInfo(pageFlag, account, password);
                     }
                 });
         customizeDialog.show();
@@ -464,7 +429,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * 根据URL判断是否登录成功
      */
-    private Boolean isURLChange(String url, String pageid) {
+    public Boolean isURLChange(String url, String pageid) {
         Boolean flag = false;
         switch (pageid) {
             case "0":
@@ -505,10 +470,39 @@ public class MainActivity extends AppCompatActivity
         return equals;
     }
 
+    private void dispatchData(Fragment currentFragment, String account, String password) {
+        switch (currentFragment.getTag()) {
+            case "fragment00":
+
+                break;
+            case "fragment01":
+
+                break;
+            case "fragment02":
+                Fragment02 fragment02 = new Fragment02();
+                Bundle bundle = new Bundle();
+                bundle.putString("login_account", account);
+                bundle.putString("login_password", password);
+                fragment02.setArguments(bundle);
+                getFragmentManager().beginTransaction().replace(R.id.frame_layout, fragment02).commit();
+                fragment02.inflaterData(fragment02);
+                break;
+            case "fragment03":
+
+                break;
+            case "fragment04":
+
+                break;
+        }
+    }
+
     /**
-     * 联系人登录信息存在时，从数据库中查出数据直接登陆
+     * 给对应的Fragment页面发送数据，并显示登录成功后的页面
+     * 几秒后联系人登录信息存在时，从数据库中查出数据直接登陆
      */
     private void login(final String pageFlag, String account, String password) {
+
+
         //把账号和密码回填入H5界面中
         webView01.loadUrl("javascript:androidLoginInterface('" + account + "','" + password + "')");
         new Thread(new Runnable() {

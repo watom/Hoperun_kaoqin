@@ -18,7 +18,7 @@ import android.widget.Toast;
 import com.watom999.www.hoperun.activity.UserInfoQuery;
 
 /**
- * Created by Administrator on 2018/7/11 0011.
+ * Created by wanghaitao on 2018/7/11 0011.
  */
 
 public class WebViewTool {

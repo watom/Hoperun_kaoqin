@@ -34,6 +34,14 @@ public class Fragment02 extends Fragment {
     WebView webview;
     View view;
 
+    /**
+     * 在onAttach()方法中注册广播接收者
+     */
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -44,28 +52,19 @@ public class Fragment02 extends Fragment {
         return view;
     }
 
-    public void inflaterData(Fragment fragment) {
-        Bundle arguments = getArguments();
-        String account = (String) arguments.get("login_account");
-        String password = (String) arguments.get("login_password");
-        webview.loadUrl("javascript:androidLoginInterface('" + account + "','" + password + "')");
-    }
-
-    @Override
-    public Animator onCreateAnimator(int transit, boolean enter, int nextAnim) {
-        return super.onCreateAnimator(transit, enter, nextAnim);
-    }
-
     private void findView(View view) {
         frameLayout = view.findViewById(R.id.frame_layout);
         webview = view.findViewById(R.id.where_webview);
     }
 
-
     /**
      * 几秒后判断登录成功后，返回给Host登录成功的数据，并提示用户
+     * 给对应的Fragment页面发送数据，并显示登录成功后的页面
+     * 几秒后联系人登录信息存在时，从数据库中查出数据直接登陆
      */
-    public void login(final String pageFlag, String account, String password) {
+    public void login( String account, String password) {
+        //把账号和密码回填入H5界面中
+        webview.loadUrl("javascript:androidLoginInterface('" + account + "','" + password + "')");
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -76,19 +75,10 @@ public class Fragment02 extends Fragment {
                     e.printStackTrace();
                 }
                 msg.what = 2;
-                msg.arg1 = Integer.parseInt(pageFlag);
+//                msg.arg1 = Integer.parseInt(pageFlag);
 //                handler.sendMessage(msg);
             }
         }).start();
         //点击H5界面的登陆按钮
     }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        if (!hidden) {
-            Logout.e("刷新Fragment数据");
-        }
-    }
-
 }

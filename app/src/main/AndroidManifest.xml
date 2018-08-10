@@ -36,6 +36,7 @@
         <activity android:name=".activity.AboutUSActivity"  />
         <activity android:name=".activity.SetTimeActivity"  />
         <activity android:name=".activity.TimingLaunchActivity"  />
+        <activity android:name="com.watom999.www.hoperun.netty.WebVisitActivity"  />
         <receiver
             android:name=".broadcast_receiver.AlarmReceiver"
             android:enabled="true"

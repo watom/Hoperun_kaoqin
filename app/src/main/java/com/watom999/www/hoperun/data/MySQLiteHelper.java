@@ -5,15 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.support.design.widget.Snackbar;
-import android.util.Log;
-import android.widget.GridLayout;
-import android.widget.Toast;
 
 import com.watom999.www.hoperun.entity.UserInfoEntity;
 import com.watom999.www.hoperun.utils.Logout;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
